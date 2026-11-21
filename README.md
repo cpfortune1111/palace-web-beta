@@ -1,11 +1,11 @@
 # Moon Palace · Web beta 0.24.09
 
-Standalone encrypted browser trial.
+Online encrypted browser trial.
 
-Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/
+Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.html
 
-Release size: 303.07 MB (289.03 MiB). Game code and media are AES-256-GCM encrypted. The bootstrap and PWA metadata are public so automatic decryption can start. Client-side automatic decryption is not DRM or a guarantee against extraction.
+Resources download individually on demand. No offline installation, full-release preload or persistent storage permission. Normal browser HTTP caching may reuse encrypted resources.
 
-All runtime dependencies, including Three.js, are inside this release folder. First launch downloads encrypted offline resources. On iPhone use Safari → Share → Add to Home Screen; on Android use Chrome → Install app.
+Release folder size: 303.11 MB. All dependencies stay inside this beta folder. Original editable sources and backups are maintained separately.
 
-Original editable sources and backups are maintained separately and are not part of this release repository.
+On iPhone use Safari → Share → Add to Home Screen. On Android use Chrome → Install app. An internet connection is required.
