@@ -1,13 +1,11 @@
 # Moon Palace · Web beta 0.24.09
 
-Online browser trial.
+Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.html?revision=noglow1
 
-Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.html?revision=mobile1
+Temporary selection diagnostic: runtime bloom, legacy glow/particles, glow meshes and blurred selection trails are disabled. Plain player borders remain. Baked artwork is retained.
 
-Media/data remain AES-256-GCM encrypted on demand. HTML/JavaScript/CSS are public. No offline installation or persistent storage request.
+Settings and pause Settings use wider fixed columns. Mobile input is locked back to Touch. Pause hides gameplay touch controls. The round HUD canvas has explicit CSS dimensions to fix high-DPI victory marker displacement.
 
-Mobile Settings uses a fixed logical layout and canvas-backed authored controls. Key/Touch and Config are temporarily enabled on phones. Hidden battle rendering stops during menus; preview tails batch blur passes; mobile battle canvas density is capped. The 60-tick battle simulation is unchanged.
+Native light and dark themes use the same authored palette, and shared image buttons use canvas-backed colours. Browser-level Force Dark may still override the page.
 
-All dependencies stay inside this beta folder. Editable sources, build tools and original backups remain private.
-
-Safari → Share → Add to Home Screen; Chrome → Install app. Internet is required.
+Media/data remain encrypted on demand; HTML/JS/CSS are public. All dependencies stay in this beta folder. Original sources and backups remain private.

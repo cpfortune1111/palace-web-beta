@@ -52,7 +52,7 @@ export function createDiscoBloom(renderer) {
   tune({glow,color,clamp}){settings.value.fromArray(glow);tint.value.set(color);limit.value=clamp},
   draw(ball,cameraBall){
    const [,,radius,intensity]=settings.value;
-   if(intensity<=0||radius<=0){renderer.render(ball,cameraBall);return}
+   if(true /* TEMP: no selection bloom */||intensity<=0||radius<=0){renderer.render(ball,cameraBall);return}
    renderer.getDrawingBufferSize(size);
    if(source.width!==size.x||source.height!==size.y){
     source.setSize(size.x,size.y);blur.setSize(Math.max(1,size.x>>1),Math.max(1,size.y>>1));

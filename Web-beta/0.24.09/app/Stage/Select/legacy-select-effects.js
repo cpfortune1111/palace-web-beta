@@ -3,7 +3,7 @@ import {lightSeeds} from '../../Engine/falling-lights.js?v=02368';
 import {effectPulse} from './select-effects-timing.js?v=selection8';
 export const legacyLayers=['Inner glow', 'Outer glow', 'Rear rays', 'Rear reflection star', 'Surface stars', 'Falling lights', 'Particle halos'];
 export function createLegacyEffects(renderer,camera,center){
- const scene=new THREE.Scene(),enabled=new Set(legacyLayers.filter(name=>name!=="Outer glow")),surfaceGlares=[],rearGlares=[];
+ const scene=new THREE.Scene(),enabled=new Set(),surfaceGlares=[],rearGlares=[];
  let time=0,innerGlow,outerGlow,glare,particles,particleHalos;
  const effects=new THREE.Group();scene.add(effects);
  const vertexShader='varying vec2 effectUv;void main(){effectUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}';
