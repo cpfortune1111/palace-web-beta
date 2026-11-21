@@ -1,0 +1,11 @@
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+let shared;
+export function loadSwatheshia(onProgress=()=>{}){if(!shared)shared=(async()=>{onProgress(0);const response=await fetch('./Stage/Swatheshia/StageSwatheshia.glb.gz');if(!response.ok)throw Error('Stage download failed');const bytes=await new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();onProgress(.7);const gltf=await new GLTFLoader().parseAsync(bytes,'./');onProgress(1);return gltf})().catch(error=>{shared=null;throw error});return shared}
+export function createContinueStage(){let renderer,scene,camera,mixer,ready,renderCount=0;
+ function prepare(onProgress=()=>{}){if(renderer)return ready;renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true,powerPreference:'low-power'});renderer.setPixelRatio(1);renderer.setSize(1280,720,false);renderer.outputColorSpace=THREE.SRGBColorSpace;scene=new THREE.Scene();scene.background=new THREE.Color('#05050d');scene.add(new THREE.HemisphereLight(0xffffff,0x303052,1));camera=new THREE.PerspectiveCamera(10,16/9,.1,5000);ready=loadSwatheshia(onProgress).then(g=>{const model=g.scene.clone(true);scene.add(model);mixer=new THREE.AnimationMixer(model);for(const a of g.animations)mixer.clipAction(a).play();setCamera(0);renderer.render(scene,camera);onProgress(1)}).catch(error=>{release();throw error});return ready}
+ function setCamera(shot){const p=shot?[0,-140,16.5]:[-46.4187,-133.889,15.2],rot=shot?[90,0,0]:[86.25,0,-15],focal=shot?87.5:240;camera.fov=THREE.MathUtils.radToDeg(2*Math.atan((36/(16/9))/(2*focal)));camera.position.set(p[0],p[2],-p[1]);camera.quaternion.setFromEuler(new THREE.Euler(...rot.map(THREE.MathUtils.degToRad),'ZYX')).premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2));camera.updateProjectionMatrix()}
+ function draw(ctx,tick,shot){if(!renderer||!mixer)return;setCamera(shot);mixer.setTime(tick/60);renderer.render(scene,camera);renderCount++;ctx.drawImage(renderer.domElement,0,0,1280,720)}
+ function release(){if(!renderer)return;mixer?.stopAllAction();renderer.dispose();renderer.forceContextLoss();renderer=null;scene=camera=mixer=null;ready=null}
+ return {prepare,draw,release,snapshot:()=>({active:!!renderer,renderCount})};
+}

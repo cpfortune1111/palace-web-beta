@@ -1,0 +1,1 @@
+export const pageRevision='beta02409';export const routerURL=new URL('../../beta-worker.js',import.meta.url).href;export async function ensureRouter(){await navigator.serviceWorker.ready;if(!navigator.serviceWorker.controller)await new Promise(r=>navigator.serviceWorker.addEventListener('controllerchange',r,{once:true}))}export function installAssetFetch(){}

@@ -1,5 +1,5 @@
-const BUILD='e48b40596964f3d2',BASE=new URL('./',self.location.href);
-const a='u15g5C3tHvnfEmJ9SYihWS48LZTGwIdkrFtXObPZt3c=',b='hzvZGU5l7tM9lJ3WPimf50sdOmUStINU+GRiq+bq+hk=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const BUILD='8e57b9fe581410d4',BASE=new URL('./',self.location.href);
+const a='fNln1Hfp66oBBI42UyMvwr5pnRF9lqqkJ9/zsS/Us0Q=',b='QLzeKRRhG4DjgnGdJIIRfNtIiuCp4q6Uc+DGI3rn/io=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
 const key=crypto.subtle.importKey('raw',raw.map((v,i)=>v^mask[i]),'AES-GCM',false,['decrypt']);
 const hex=bytes=>[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
 let metadata,index,active=0,decodedBytes=0;const queue=[],inflight=new Map(),decoded=new Map();
@@ -26,5 +26,5 @@ async function virtual(request,path){const value=await asset(path);if(!value)ret
  headers['Content-Length']=String(data.byteLength);return new Response(request.method==='HEAD'?null:data,{status:200,headers})}
 self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();for(const name of await caches.keys())if(name.startsWith('moon-palace-beta-02409-'))await caches.delete(name)})()));
-self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==BASE.origin||!url.pathname.startsWith(BASE.pathname))return;const path=decodeURIComponent(url.pathname.slice(BASE.pathname.length));if(path.startsWith('app/'))event.respondWith(virtual(event.request,path.slice(4)).catch(e=>new Response('Unable to load encrypted content: '+e.message,{status:503,headers:{'Content-Type':'text/plain'}})));else event.respondWith(fetch(event.request))});
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==BASE.origin||!url.pathname.startsWith(BASE.pathname))return;const path=decodeURIComponent(url.pathname.slice(BASE.pathname.length));if(path.startsWith('app/')&&/\.(?:js|html|css)$/.test(path)){const codeURL=new URL(event.request.url);codeURL.searchParams.set('betaBuild',BUILD);event.respondWith(fetch(codeURL,{cache:'default'}));return}if(path.startsWith('app/'))event.respondWith(virtual(event.request,path.slice(4)).catch(e=>new Response('Unable to load encrypted content: '+e.message,{status:503,headers:{'Content-Type':'text/plain'}})));else event.respondWith(fetch(event.request))});
 self.addEventListener('message',event=>{if(!['READY','PREPARE'].includes(event.data?.type)||!event.ports[0])return;const port=event.ports[0];event.waitUntil(catalog().then(()=>port.postMessage({type:'ready',build:BUILD,onlineOnly:true})).catch(e=>port.postMessage({type:'error',message:e.message})))});
