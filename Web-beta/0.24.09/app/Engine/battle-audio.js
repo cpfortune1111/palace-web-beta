@@ -5,8 +5,8 @@ export function createBattleAudio(){
  const key=url=>new URL(url,location.href).href;
  function audioContext(){return context??=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'})}
  async function prepare(urls,progress=()=>{}){
-  const unique=[...new Set(urls.map(key))];let completed=0,next=0;progress(0);await Promise.race([audioContext().resume(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Tap Retry to enable battle audio')),5000))]);
-  await Promise.all(Array.from({length:Math.min(6,unique.length)},async()=>{
+  const unique=[...new Set(urls.map(key))];let completed=0,next=0;for(const url of buffers.keys())if(!unique.includes(url))buffers.delete(url);progress(0);audioContext().resume().catch(()=>{});
+  await Promise.all(Array.from({length:Math.min(matchMedia('(pointer:coarse)').matches?2:6,unique.length)},async()=>{
    while(next<unique.length){const url=unique[next++];if(!buffers.has(url)){
     const response=await fetch(url);if(!response.ok)throw Error('Battle audio HTTP '+response.status+': '+url);
     const buffer=await audioContext().decodeAudioData(await response.arrayBuffer());decodeCount++;buffers.set(url,buffer);
@@ -21,5 +21,5 @@ export function createBattleAudio(){
   handle.play=async()=>{playCount++;if(ctx.state!=='running'){lateResumes++;await ctx.resume()}handle.pause();gain=ctx.createGain();gain.gain.value=volume;gain.connect(ctx.destination);source=ctx.createBufferSource();source.buffer=buffer;source.connect(gain);source.onended=()=>{source=null;gain.disconnect();handle.dispatchEvent(new Event('ended'))};source.start()};
   return handle;
  }
- return {prepare,create,snapshot:()=>({sounds:buffers.size,decodedBytes:[...buffers.values()].reduce((n,b)=>n+b.length*b.numberOfChannels*4,0),state:context?.state,baseLatency:context?.baseLatency,outputLatency:context?.outputLatency,decodeCount,playCount,lateResumes})};
+ return {prepare,create,running:()=>context?.state==='running',resume:()=>audioContext().resume(),snapshot:()=>({sounds:buffers.size,decodedBytes:[...buffers.values()].reduce((n,b)=>n+b.length*b.numberOfChannels*4,0),state:context?.state,baseLatency:context?.baseLatency,outputLatency:context?.outputLatency,decodeCount,playCount,lateResumes})};
 }

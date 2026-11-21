@@ -18,7 +18,7 @@ export function createLoadFailureRecovery({notify,online=()=>navigator.onLine!==
   const retry=options.retry;if(!info.recoverable||typeof retry!=='function'){notify(info,'Your progress is kept. This error needs to be resolved before loading can continue.');return}
   let action=retry;
   if(attempts>=3&&options.inPlace&&info.kind!=='connection'){if(options.rebuild)action=options.rebuild;else{notify(info,'Automatic recovery could not resolve this error. Your progress is kept.');return}}
-  const run=async()=>{if(current!==generation)return;timer=null;attempts++;notify(info,'Reconnecting automatically. Your progress is kept.');try{await action()}catch(next){if(next.code==='RECOVERY_LIMIT')next.message+='\nPrevious loading error: '+info.detail;fail(next,options)}};
+  const run=async()=>{if(current!==generation)return;timer=null;attempts++;notify(info,'Reconnecting automatically. Your progress is kept.');try{await action()}catch(next){if(current!==generation)return;if(next.code==='RECOVERY_LIMIT')next.message+='\nPrevious loading error: '+info.detail;fail(next,options)}};
   if(!online()){notify(info,'Your progress is kept. Loading will resume automatically when the connection returns.');unsubscribe=listen(()=>{unsubscribe?.();unsubscribe=null;run()});return}
   if(attempts>=3&&!options.inPlace){notify(info,'Automatic recovery could not resolve this error. Your progress is kept.');return}
   const delay=attempts<3?[1000,3000,8000][attempts]:30000;

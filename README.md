@@ -1,19 +1,15 @@
 # Moon Palace · Web beta 0.24.09
 
-Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.html?revision=flow1
+Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.html?revision=recovery2
 
-Online browser trial. Public HTML/JS/CSS; automatically decrypted AES-256-GCM media/data. No mandatory offline download or storage permission. All runtime dependencies remain in this folder.
+Mobile hides the debug HUD while preserving life bars, touch controls and pause controls. Movelist magnifier center is tap + (0,88) design pixels.
 
-Loading percentage uses a hard-edged mask: gray over black, black over the filled pink bar.
+Stage list: Training Room; Silver Millennium (Stage Moon); Moon Palace (Swatheshia). Stage labels share the Training Room center and height, with original image proportions retained.
 
-Before selection becomes interactive, Loading prepares all five trial characters' selection / ACS / versus declaration imagery and voices, ACS controls / font / light textures, and VS model shaders. Result declarations remain deferred until needed. Returning from battle refreshes released quote images before showing selection. No ACS / versus asset downloads are deferred until players choose. Decoded quote bitmaps remain resident through the selection flow. Expensive selection GPU destruction and quote-image release run only after the battle Loading screen has painted, not during selection-to-ACS handoff.
+Loading has a single visible owner. Boot loading finishes on logo-free checkpoint recovery. All loaders close before battle unpauses; any visible loader blocks simulation and battle controls. Recovery cancels stale work, resets the encrypted worker, restarts progress from zero through the entry page and refreshes corrupt cached downloads. Invalid legacy checkpoints return safely to home or selection. Audio gesture restrictions preserve loaded data and present Continue instead of triggering resource retries.
 
-Movelist magnifier samples the tapped point, displaying it at a circle center offset +68,+68 design pixels. Existing clipping, 280% magnification and release behavior remain.
+Battle sprites are prepared into a small set of padded resident atlas pages, retaining the existing memory budget and logical sprite geometry. The Jupiter/Moon test uses 9 texture pages for 2,934 sprites instead of thousands of separate images. No battle-canvas pixel readback is used for prewarming. Encrypted loading concurrency and cache size are limited on mobile; decoded encrypted buffers are trimmed before battle. Original editable art, code and build inputs remain preserved privately.
 
-While paused, Endgame exits to the menu using the battle-exit behavior. Its width matches the portrait background (120 design pixels), original 238:74 ratio retained; the Settings / Movelist switch sits below with one Endgame-height gap. Buttons shrink and rebound about their centers.
+Prior selection / ACS / versus preloading, masked Loading percentage, pause Endgame control, mobile popup fitting and disabled Trail Blur / GLB Glow are retained. Public HTML/JS/CSS; automatically decrypted AES-256-GCM media/data; no mandatory offline preparation. All dependencies stay in this folder. Client-side automatic decryption is not DRM.
 
-Mobile popups use desktop 1280x720 design proportions fitted to the visible browser area. Trail Blur remains disabled, GLB Glow meshes hidden and selection HUD removed; other approved selection effects remain enabled. Prior resident battle sprite / sound preparation and memory fixes are retained.
-
-Public HTML/JS/CSS; automatically decrypted AES-256-GCM media/data. No mandatory offline download or storage permission. All dependencies remain inside this folder. Editable originals and build inputs remain preserved separately; automatic client-side decryption is not DRM.
-
-Install: Safari → Share → Add to Home Screen; Android browser menu → Install app / Add to Home Screen. Internet required.
+Install: Safari → Share → Add to Home Screen; Android browser menu → Install app / Add to Home Screen. Internet required. Physical low-end phone performance still requires device verification.

@@ -21,7 +21,7 @@ export function createMoveList({parent=document.body,preview=false,settings,alte
   lensContext.clearRect(0,0,1280,720);
   if(!drag||canvas.hidden||view!=='movelist'||switchAt)return;
   if(preview){const bounds=canvas.getBoundingClientRect();lens.style.cssText=`position:fixed;left:${bounds.left}px;top:${bounds.top}px;width:${bounds.width}px;height:${bounds.height}px;pointer-events:none;z-index:101`;foreground.style.cssText=lens.style.cssText+';z-index:102'}
-  const x=drag.x+68,y=drag.y+68,c=lensContext;
+  const x=drag.x,y=drag.y+88,c=lensContext;
   screen.save();screen.beginPath();screen.rect(152,140,976,544);screen.clip();screen.globalCompositeOperation='destination-out';screen.beginPath();screen.arc(x,y,120,0,Math.PI*2);screen.fill();screen.restore();
   c.save();c.beginPath();c.rect(152,140,976,544);c.clip();
   c.shadowColor='rgba(0,0,0,.25)';c.shadowOffsetY=4;c.shadowBlur=4;c.fillStyle='#000';

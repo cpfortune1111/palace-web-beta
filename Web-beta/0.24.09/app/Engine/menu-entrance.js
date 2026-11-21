@@ -4,7 +4,7 @@ export function createMenuEntrance(parent,{loading,onFrame,ready,progress,show})
  async function run(mode){if(active)return;active=true;const token=++serial;white.style.display='block';white.style.opacity='0';try{
   if(!await frames(90,amount=>{onFrame(amount);white.style.opacity=String(Math.max(0,(amount-.5)*2))},token))return;
   loading.show();const timer=setInterval(()=>loading.update(Math.min(.99,progress())),50);try{await Promise.all([ready(),frames(15,()=>{},token)])}finally{clearInterval(timer)}if(token!==serial)return;
-  loading.update(1);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));show(mode);onFrame(0);loading.hide();
+  loading.update(1);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));await show(mode);if(token!==serial)return;onFrame(0);loading.hide();
   await frames(30,amount=>white.style.opacity=String(1-amount),token);
  }catch(error){loading.fail(error,()=>{cancel();show(null)});return}finally{if(token===serial){active=false;white.style.display='none'}}}
  function cancel(){serial++;active=false;white.style.display='none';onFrame(0);loading.hide()}
