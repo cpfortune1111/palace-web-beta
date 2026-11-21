@@ -5,7 +5,7 @@ import {createQuotePortrait,quoteDuration} from './quote-animation.js?v=saturnQu
 export function createDeclarationScreen(api){
  const portraits=[createQuotePortrait(),createQuotePortrait()];let variants=[],active=false,preparedPlayers=[];
  const versus=createVersusModel(),ready=Promise.all([versus.ready,...portraits.map(p=>p.ready)]);
- async function prepare(players){await Promise.all(players.map(async(character,index)=>{await portraits[index].select(character);await portraits[index].prepare('all')}));preparedPlayers=[...players]}
+ async function prepare(players,actions='all'){await Promise.all(players.map(async(character,index)=>{await portraits[index].select(character);await portraits[index].prepare(actions)}));preparedPlayers=[...players]}
  const flow=createDeclarationFlow({variant:player=>variants[player-1],voiceTick:player=>portraits[player-1].tick,startVoice:player=>{portraits[player-1].set(variants[player-1].id);if(!flow.snapshot().result)portraits[player-1].step(0,audio=>api.sound?api.sound(audio):audio)},play:()=>{},playing:()=>portraits.some(p=>p.playing),complete:()=>{active=false;api.complete()}});
  function begin(players,options={}){
   if(players.some((c,i)=>preparedPlayers[i]!==c))throw Error('Selected portrait declarations were not prepared');

@@ -35,3 +35,5 @@ export function createQuotePortrait(initialCharacter='SailorVenus'){
 }
 
 export async function releaseQuoteImages(){for(const promise of libraries.values()){const assets=await promise;assets.images.clear()}}
+
+export async function preloadSelectionFlowQuotes(){for(const character of ['SailorMoon','SailorJupiter','SailorVenus','SailorNeptune','SailorSaturn']){const assets=await library(character);await preloadQuoteAssets(character,['9000','9010','9011','9012'].filter(id=>assets.manifest.actions[id]))}}

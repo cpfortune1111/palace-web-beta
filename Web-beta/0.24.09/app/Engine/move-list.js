@@ -21,13 +21,13 @@ export function createMoveList({parent=document.body,preview=false,settings,alte
   lensContext.clearRect(0,0,1280,720);
   if(!drag||canvas.hidden||view!=='movelist'||switchAt)return;
   if(preview){const bounds=canvas.getBoundingClientRect();lens.style.cssText=`position:fixed;left:${bounds.left}px;top:${bounds.top}px;width:${bounds.width}px;height:${bounds.height}px;pointer-events:none;z-index:101`;foreground.style.cssText=lens.style.cssText+';z-index:102'}
-  const {x,y}=drag,c=lensContext;
+  const x=drag.x+68,y=drag.y+68,c=lensContext;
   screen.save();screen.beginPath();screen.rect(152,140,976,544);screen.clip();screen.globalCompositeOperation='destination-out';screen.beginPath();screen.arc(x,y,120,0,Math.PI*2);screen.fill();screen.restore();
   c.save();c.beginPath();c.rect(152,140,976,544);c.clip();
   c.shadowColor='rgba(0,0,0,.25)';c.shadowOffsetY=4;c.shadowBlur=4;c.fillStyle='#000';
   c.beginPath();c.arc(x,y,120,0,Math.PI*2);c.fill();
   c.shadowColor='transparent';c.shadowOffsetY=0;c.shadowBlur=0;c.globalCompositeOperation='destination-out';c.fill();c.globalCompositeOperation='source-over';c.clip();
-  c.drawImage(content,x+(152-x)*2.8,y+(140-y)*2.8,976*2.8,544*2.8);
+  c.drawImage(content,x+(152-drag.x)*2.8,y+(140-drag.y)*2.8,976*2.8,544*2.8);
   c.restore();
  }
  const sparkleC=document.createElement("canvas");sparkleC.width=bg.width;sparkleC.height=bg.height;

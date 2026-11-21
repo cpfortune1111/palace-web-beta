@@ -1,0 +1,33 @@
+const BUILD='1312c75cf47d80df',BASE=new URL('./',self.location.href);
+const a='FsBbmx7S3k/8pgx4kq5AeBmANGohSyevh3BjML5Zv/Q=',b='KqXiZn1aLmUeIPPT5Q9+xnyhI5v1PyOf009Woutq8po=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const key=crypto.subtle.importKey('raw',raw.map((v,i)=>v^mask[i]),'AES-GCM',false,['decrypt']);
+const hex=bytes=>[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
+let metadata,index,active=0,decodedBytes=0;const queue=[],inflight=new Map(),decoded=new Map();
+async function slot(fn){if(active>=6)await new Promise(resolve=>queue.push(resolve));active++;try{return await fn()}finally{active--;queue.shift()?.()}}
+async function readNetwork(file,hash,expected){return slot(async()=>{let failure;for(let attempt=0;attempt<3;attempt++){
+ const controller=new AbortController();let timer=setTimeout(()=>controller.abort(),30000);try{
+  const response=await fetch(new URL(file,BASE),{cache:'default',signal:controller.signal});if(!response.ok)throw Error('HTTP '+response.status+' · '+file);
+  const reader=response.body.getReader(),chunks=[];let size=0;while(true){const {value,done}=await reader.read();if(done)break;clearTimeout(timer);timer=setTimeout(()=>controller.abort(),30000);chunks.push(value);size+=value.length}clearTimeout(timer);
+  if(expected!==undefined&&size!==expected)throw Error('Incomplete download · '+file);const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
+  if(hash&&hex(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)))!==hash)throw Error('Integrity check failed · '+file);return bytes.buffer;
+ }catch(error){clearTimeout(timer);failure=error;if(attempt===2||/HTTP (?:400|401|403|404|410)/.test(error.message))throw error;await new Promise(resolve=>setTimeout(resolve,[600,1600][attempt]))}}
+ throw failure})}
+async function release(){return metadata??=fetch(new URL('release.json?build='+BUILD,BASE),{cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('Release metadata HTTP '+r.status);const data=await r.json();if(data.build!==BUILD)throw Error('A newer update is being published. Reopen the entry page.');return data}).catch(e=>{metadata=null;throw e})}
+let decryptCount=0;async function decrypt(bytes){decryptCount++;const data=new Uint8Array(bytes);return crypto.subtle.decrypt({name:'AES-GCM',iv:data.subarray(0,12)},await key,data.subarray(12))}
+async function catalog(){return index??=(async()=>{const m=await release(),bytes=await readNetwork('catalog.bin?build='+BUILD,m.catalog.sha256,m.catalog.bytes);let plain=await decrypt(bytes);if(m.catalog.gzip)plain=await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();return JSON.parse(new TextDecoder().decode(plain))})().catch(e=>{index=null;throw e})}
+async function asset(path){const entries=await catalog(),entry=entries[path];if(!entry)return null;const id=entry.id;
+ if(decoded.has(id)){const data=decoded.get(id);decoded.delete(id);decoded.set(id,data);return {entry,data}}
+ if(!inflight.has(id))inflight.set(id,(async()=>{const encrypted=await readNetwork(entry.file,entry.sha256,entry.length);let data=await decrypt(encrypted);if(entry.gzip)data=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();if(data.byteLength!==entry.bytes)throw Error('Decoded size mismatch · '+path);
+ if(data.byteLength<=8*1024*1024){decoded.set(id,data);decodedBytes+=data.byteLength;while(decodedBytes>32*1024*1024&&decoded.size){const first=decoded.keys().next().value;decodedBytes-=decoded.get(first).byteLength;decoded.delete(first)}}return data})().finally(()=>inflight.delete(id)));
+ return {entry,data:await inflight.get(id)}}
+async function virtual(request,path){const value=await asset(path);if(!value)return new Response('Missing resource: '+path,{status:404});let {entry,data}=value;const headers={'Content-Type':entry.mime,'Cache-Control':'no-store','Accept-Ranges':'bytes','X-Content-Type-Options':'nosniff'};
+ /* LOCAL_TEST_HTML_TRANSFORM */
+ const range=request.headers.get('Range');if(range){const m=/^bytes=(\d*)-(\d*)$/.exec(range);if(!m)return new Response(null,{status:416});const size=data.byteLength,start=m[1]?Number(m[1]):Math.max(0,size-Number(m[2])),end=Math.min(size-1,m[1]?(m[2]?Number(m[2]):size-1):size-1);if(start>end||start>=size)return new Response(null,{status:416,headers:{'Content-Range':'bytes */'+size}});headers['Content-Range']=`bytes ${start}-${end}/${size}`;headers['Content-Length']=String(end-start+1);return new Response(request.method==='HEAD'?null:data.slice(start,end+1),{status:206,headers})}
+ headers['Content-Length']=String(data.byteLength);return new Response(request.method==='HEAD'?null:data,{status:200,headers})}
+self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();for(const name of await caches.keys())if(name.startsWith('moon-palace-beta-02409-'))await caches.delete(name)})()));
+async function fetchCode(url){let response,error;for(let attempt=0;attempt<3;attempt++){try{response=await fetch(url,{cache:attempt?'reload':'default'});if(response.ok||(![408,429].includes(response.status)&&response.status<500))return response}catch(e){error=e}if(attempt<2)await new Promise(r=>setTimeout(r,[600,1600][attempt]))}if(response)return response;throw error}
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==BASE.origin||!url.pathname.startsWith(BASE.pathname))return;const path=decodeURIComponent(url.pathname.slice(BASE.pathname.length));if(path.startsWith('app/')&&/\.(?:js|html|css)$/.test(path)){const codeURL=new URL(event.request.url);codeURL.searchParams.set('betaBuild',BUILD);event.respondWith(fetchCode(codeURL));return}if(path.startsWith('app/'))event.respondWith(virtual(event.request,path.slice(4)).catch(e=>new Response('Unable to load encrypted content: '+e.message,{status:503,headers:{'Content-Type':'text/plain'}})));else event.respondWith(fetch(event.request))});
+self.addEventListener('message',event=>{if(!['READY','PREPARE'].includes(event.data?.type)||!event.ports[0])return;const port=event.ports[0];event.waitUntil(catalog().then(()=>port.postMessage({type:'ready',build:BUILD,onlineOnly:true})).catch(e=>port.postMessage({type:'error',message:e.message})))});
+
+self.addEventListener('message',event=>{if(event.data?.type==='DIAGNOSTICS'&&event.ports[0])event.ports[0].postMessage({decryptCount,decodedBytes,inflight:inflight.size})});

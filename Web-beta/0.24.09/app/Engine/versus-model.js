@@ -24,6 +24,6 @@ const ready=(async()=>{const response=await fetch('./Data/VS/VS.glb.gz?v=02408r3
   outgoingLight=outgoingLight*(.42+.85*exp(-band*band))
    +vec3(1.0,.65,.86)*exp(-gleam*gleam)*.9;
   #include <opaque_fragment>`);
-};materials.push({name:m.name,color:m.color.getHexString(),metalness:m.metalness,roughness:m.roughness,clearcoat:m.clearcoat})}});pivot.add(gltf.scene);loaded=true;return shared})();
+};materials.push({name:m.name,color:m.color.getHexString(),metalness:m.metalness,roughness:m.roughness,clearcoat:m.clearcoat})}});pivot.add(gltf.scene);pivot.scale.setScalar(.4/modelHeight);await renderer.compileAsync(scene,camera);renderer.render(scene,camera);loaded=true;return shared})();
 function draw(context,pose){if(!loaded||pose.height<=0)return;if(pose.angle!==lastAngle||pose.height!==lastHeight){pivot.rotation.y=pose.angle;pivot.scale.setScalar(2*pose.height/modelHeight);renderer.render(scene,camera);lastAngle=pose.angle;lastHeight=pose.height;renderCount++}context.drawImage(renderer.domElement,0,0,1280,720)}
 shared={ready,draw,snapshot:()=>({loaded,materials,modelHeight,angle:lastAngle,height:lastHeight,renderCount}),canvas:renderer.domElement};return shared}

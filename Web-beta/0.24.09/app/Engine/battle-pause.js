@@ -10,7 +10,7 @@ export function createBattlePause({members,canPause,pause,resume,shell,bindings}
  const toolbar=document.createElement('div');toolbar.id='battlePauseButtons';toolbar.style.cssText=surface.style.cssText+';z-index:400';document.body.append(toolbar);
  function layout(){const w=visualViewport?.width||innerWidth,h=visualViewport?.height||innerHeight,fit=Math.min(w/1280,h/720);for(const el of [surface,toolbar]){el.style.left=w/2+'px';el.style.top=h/2+'px';el.style.transform=`translate(-50%,-50%) scale(${fit})`}};layout();addEventListener('resize',layout);visualViewport?.addEventListener('resize',layout);addEventListener('orientationchange',()=>{layout();setTimeout(layout,150)});
  function icon(name,x,y,label,action){
-  const b=document.createElement('button'),img=new Image(),size=name==='Pause'||name==='Play'?[48,48]:[99,129];
+  const b=document.createElement('button'),img=new Image(),size=name==='Endgame'?[120,120*74/238]:name==='Pause'||name==='Play'?[48,48]:[99,129];
   b.type='button';b.ariaLabel=label;b.dataset.ownPress='';
   b.style.cssText=`position:absolute;left:${640+x}px;top:${360+y}px;translate:-50% -50%;width:${size[0]}px;height:${size[1]}px;padding:0;border:0;border-radius:0;background:transparent;overflow:visible;pointer-events:auto;touch-action:manipulation;transform-origin:center;transition:transform 80ms`;
   img.src=new URL('../Data/Movelist/'+name+'.webp?v=pauseHUD2',import.meta.url);img.draggable=false;
@@ -21,7 +21,8 @@ export function createBattlePause({members,canPause,pause,resume,shell,bindings}
  }
  function toggleIcon(next){const name=next==='movelist'?'Settings':'Movelist';toggle.firstChild.src=new URL('../Data/Movelist/'+name+'.webp?v=pauseHUD2',import.meta.url);toggle.ariaLabel=next==='movelist'?'Switch to settings':'Switch to movelist'}
  const play=icon('Pause',-589,-200,'Pause battle',()=>list.active?close():open());
- const toggle=icon('Settings',561,-160,'Switch to settings',()=>{if(!list.active)return;const next=page==='movelist'?'settings':'movelist';if(list.switchView(next)){toggleIcon(next);config=null;shell().audio.effect('btn-click')}});toggle.hidden=true;
+ const endHeight=120*74/238,endTop=135.5;const endgame=icon('Endgame',560,endTop+endHeight/2-360,'End game',()=>{close();shell().showHome()});endgame.hidden=true;
+ const toggle=icon('Settings',560,endTop+endHeight*2+129/2-360,'Switch to settings',()=>{if(!list.active)return;const next=page==='movelist'?'settings':'movelist';if(list.switchView(next)){toggleIcon(next);config=null;shell().audio.effect('btn-click')}});toggle.hidden=true;
  const list=createMoveList({alternate(ctx,view,opacity){const image=shell().settingsBackground();ctx.globalAlpha=opacity;ctx.filter=dim?'brightness(.8)':'none';if(image)ctx.drawImage(image,152,140,976,544);ctx.filter='none';ctx.globalAlpha=1},phase(state){
   readyToInteract=!state.transitioning;surface.hidden=!list.active;
   if(state.view!==page){page=state.view;render()}
@@ -42,8 +43,8 @@ export function createBattlePause({members,canPause,pause,resume,shell,bindings}
   box.append(inputSwitchRow());content.append(box);
   const button=settingsArt('Config',-138,170,'Key Config',()=>{if(list.switchView('config'))shell().audio.effect('btn-click')});button.disabled=touchOnly();if(button.disabled)button.style.filter='grayscale(1)';content.append(button,settingsArt('Back',138,170,'Back to movelist',()=>{if(list.switchView('movelist'))toggleIcon('movelist')}));
  }
- function open(){if(!canPause()||list.active)return;page='movelist';toggleIcon('movelist');config=null;document.body.dataset.pauseUi='true';pause();list.open(members());surface.hidden=false;render();play.firstChild.src=new URL('../Data/Movelist/Play.webp',import.meta.url);play.ariaLabel='Resume battle';toggle.hidden=false;shell().audio.effect('btn-click')}
- function close(){if(!list.active)return;document.body.dataset.pauseUi='false';list.close();dim=false;surface.hidden=true;toggle.hidden=true;controls.replaceChildren();config=null;dim=false;page='movelist';play.firstChild.src=new URL('../Data/Movelist/Pause.webp',import.meta.url);play.ariaLabel='Pause battle';resume();shell().audio.effect('btn-click')}
- const iconsReady=Promise.all(['Pause','Play','Settings','Movelist'].map(async name=>{const image=new Image();image.src=new URL('../Data/Movelist/'+name+'.webp?v=pauseHUD2',import.meta.url);await image.decode()}));
+ function open(){if(!canPause()||list.active)return;page='movelist';toggleIcon('movelist');config=null;document.body.dataset.pauseUi='true';pause();list.open(members());surface.hidden=false;render();play.firstChild.src=new URL('../Data/Movelist/Play.webp',import.meta.url);play.ariaLabel='Resume battle';toggle.hidden=false;endgame.hidden=false;shell().audio.effect('btn-click')}
+ function close(){if(!list.active)return;document.body.dataset.pauseUi='false';list.close();dim=false;surface.hidden=true;toggle.hidden=true;endgame.hidden=true;controls.replaceChildren();config=null;dim=false;page='movelist';play.firstChild.src=new URL('../Data/Movelist/Pause.webp',import.meta.url);play.ariaLabel='Pause battle';resume();shell().audio.effect('btn-click')}
+ const iconsReady=Promise.all(['Pause','Play','Settings','Movelist','Endgame'].map(async name=>{const image=new Image();image.src=new URL('../Data/Movelist/'+name+'.webp?v=pauseHUD2',import.meta.url);await image.decode()}));
  return {ready:Promise.all([list.ready,iconsReady]),open,close,get active(){return list.active},get view(){return page},key(event){if(config){config(event);return}if(event.code==='Enter'&&!event.repeat)close();else if(page==='movelist')list.key(event.code)}};
 }
