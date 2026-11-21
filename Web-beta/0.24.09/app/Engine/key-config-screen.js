@@ -5,9 +5,9 @@ export function settingsArt(name,x,y,label,action){
  const image=new Image();
  image.src=new URL(artwork+name+'.webp',import.meta.url);
  image.alt=action?'':label;
- const element=action?document.createElement('button'):image;
+ const art=document.createElement('canvas');art.setAttribute('role','img');art.setAttribute('aria-label',label);image.onload=()=>{art.width=image.naturalWidth;art.height=image.naturalHeight;art.style.width=art.width+'px';art.style.height=art.height+'px';art.getContext('2d').drawImage(image,0,0)};if(image.complete&&image.naturalWidth)image.onload();const element=action?document.createElement('button'):art;
  element.style.cssText='position:absolute;left:'+(640+x)+'px;top:'+(360+y)+'px;translate:-50% -50%;border:0;padding:0;background:none';
- if(action){element.type='button';element.setAttribute('aria-label',label);element.append(image);image.style.display='block';element.onclick=action}
+ if(action){element.type='button';element.setAttribute('aria-label',label);element.append(art);art.style.display='block';element.onclick=action}
  return element;
 }
 

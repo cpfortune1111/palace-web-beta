@@ -104,11 +104,11 @@ export function createDiscoInterface(model,camera,panorama,portraitLayer){const 
     }else{
      const head=(time*.22+player*.5)*total;
      ctx.strokeStyle=color;ctx.shadowBlur=9;
-     for(let i=169;i>=0;i--){
-      const a=pointAt(head-i*3),b=pointAt(head-(i+1)*3);
-      const strength=1-i/170;
+     for(let end=169;end>=0;end-=4){
+      const start=Math.max(0,end-3),strength=1-(end+start)/340;
       ctx.globalAlpha=strength*strength;ctx.lineWidth=1+strength*3;
-      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      const first=pointAt(head-end*3);ctx.beginPath();ctx.moveTo(first.x,first.y);
+      for(let i=end;i>=start;i--){const p=pointAt(head-(i+1)*3);ctx.lineTo(p.x,p.y)}ctx.stroke();
      }
      const {x,y}=pointAt(head),glow=ctx.createRadialGradient(x,y,0,x,y,13);
      glow.addColorStop(0,'white');glow.addColorStop(.25,color);glow.addColorStop(1,color+'00');

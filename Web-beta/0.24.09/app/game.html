@@ -59,7 +59,7 @@ body:not([data-battle-ui="visible"]) :is(#hud,#inputPanel,#debugBtns,#ctrl,#touc
 body:not([data-battle-ui="visible"]) #battlePauseButtons{display:none}
 body[data-touch-mirrored="true"] #ctrl{left:auto!important;right:34px!important}
 body[data-touch-mirrored="true"] #touchAttacks{right:auto;left:24px}
-</style><link rel="icon" href="../icon-192.png"><link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><meta name="theme-color" content="#211742"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="color-scheme" content="only light"><meta name="darkreader-lock"><style>:root{color-scheme:only light}html,body{background:#211742!important}*{forced-color-adjust:none}</style></head>
+</style><link rel="icon" href="../icon-192.png"><link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><meta name="theme-color" content="#211742"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="color-scheme" content="only light"><meta name="darkreader-lock"><style>:root{color-scheme:only light}html,body{background:#211742!important}*{forced-color-adjust:none}</style><style>html,body{-webkit-text-size-adjust:none;text-size-adjust:none}#settingsPage{isolation:isolate}#settingsPage label{white-space:nowrap}</style></head>
 <body><script type="module">import {createLoadingScreen} from './Engine/loading-screen.js';const bootLoading=createLoadingScreen(document.body,'initialGameLoading');bootLoading.show();const ready=new MutationObserver(()=>{if(document.getElementById('importantNotice')||document.getElementById('logoIntro')){bootLoading.hide();document.getElementById('initialGameLoading')?.remove();ready.disconnect()}});ready.observe(document.body,{childList:true,subtree:true});</script><div id="app"></div><canvas id="venus"></canvas><canvas id="mars"></canvas><canvas id="collision"></canvas><div id="hud"><b>Web beta 0.24.09 · Disco Mirrors / Projectile Priority</b><div id="buildid" style="font-size:12px;opacity:.72;margin-top:2px">BUILD baseline-02408-r39-20261030</div><div id="status">Downloading StageTraining.glb…</div><div id="detail">0 / ? MB</div><div id="pbar"><div id="pfill"></div></div><div id="hudCamera">CAMERA</div><div id="act">Action 0 · Idle</div></div><div id="debugBtns"><select id="dbgBoxes" aria-label="Collision boxes"><option value="none">NO CLSN</option><option value="hurt">SHOW HURTBOX</option><option value="hit">SHOW HITBOX</option><option value="both">SHOW BOXES</option></select><button id="dbgPlay" aria-label="Play">▶</button><button id="dbgPause" aria-label="Pause / step">Ⅱ</button><button id="dbgTrace" aria-label="Export match log" title="Export entire match log">EXPORT LOG</button><button id="dbgMark" title="Mark the current problem time">MARK</button></div>
 <div id="ctrl"><div id="touchShoulders"><button id="atkL" class="touchButton" data-action="l" aria-label="L">L</button><button id="atkR" class="touchButton" data-action="r" aria-label="R">R</button></div><div id="stick"><div id="stickKnob"></div></div></div><div id="touchAttacks"><button id="atkA" class="touchButton" data-action="a" aria-label="A attack">A</button><button id="atkB" class="touchButton" data-action="b" aria-label="B attack">B</button><button id="atkX" class="touchButton" data-action="x" aria-label="X attack">X</button><button id="atkY" class="touchButton" data-action="y" aria-label="Y attack">Y</button></div>
 <div id="inputPanel"><label for="inputMode">Input </label><select id="inputMode"><option value="auto">Auto / 自動</option><option value="keyboard">Keyboard / 鍵盤</option><option value="touch">Touch / 觸控</option></select><div id="inputHint" aria-live="polite"></div><label> P2 <select id="p2Guard"><option value="none">不防禦</option><option value="stand">站立防禦</option><option value="crouch">蹲下防禦</option></select></label><label> 控制 <select id="p2Control"><option value="dummy">Dummy / 測試</option><option value="keyboard">Keyboard / Numpad</option></select></label><button id="p2Punch" style="font-size:11px;padding:3px 6px;margin-left:6px;border-radius:4px" title="Numpad0 / 地面單次出拳測試，非 AI">P2 出拳測試</button></div>
@@ -143,7 +143,7 @@ dbgPlay.title='Play · Pause/Break';dbgPause.title='Pause / Step · Scroll Lock'
 
 hud.addEventListener('click',()=>{hudCollapsed=!hudCollapsed;hud.classList.toggle('collapsed',hudCollapsed)});
 
-const r=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});r.setPixelRatio(Math.min(devicePixelRatio,1.5));r.outputColorSpace=THREE.SRGBColorSpace;app.appendChild(r.domElement);
+const battlePixelRatio=(matchMedia('(pointer:coarse)').matches?Math.min(window.devicePixelRatio,1):window.devicePixelRatio);const r=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});r.setPixelRatio(Math.min(battlePixelRatio,1.5));r.outputColorSpace=THREE.SRGBColorSpace;app.appendChild(r.domElement);
 const s=new THREE.Scene();s.background=new THREE.Color(0x05050d);
 const IK={w:1280,h:720,fov:30,zoomout:.75,zoffset:660,modelOffset:[0,-.2,-.9],modelScale:.075};
 const posMul=Math.tan(THREE.MathUtils.degToRad(IK.fov/2))*(-IK.modelOffset[2])/(IK.h/2);
@@ -207,9 +207,9 @@ fetch(assetUrl('./stage_visuals.json?v=02362')).then(response=>{if(!response.ok)
 }).catch(showRuntimeError);
 function drawStageVisuals(){
  const vw=visualViewport?visualViewport.width:innerWidth,vh=visualViewport?visualViewport.height:innerHeight,fit=Math.min(vw/1280,vh/720),viewX=(vw-1280*fit)/2,viewY=(vh-720*fit)/2;
- for(const canvas of [reflectionCanvas,filterCanvas]){if(canvas.width!==Math.round(vw*devicePixelRatio)||canvas.height!==Math.round(vh*devicePixelRatio)){canvas.width=Math.round(vw*devicePixelRatio);canvas.height=Math.round(vh*devicePixelRatio)}canvas.style.width=vw+'px';canvas.style.height=vh+'px'}
+ for(const canvas of [reflectionCanvas,filterCanvas]){if(canvas.width!==Math.round(vw*battlePixelRatio)||canvas.height!==Math.round(vh*battlePixelRatio)){canvas.width=Math.round(vw*battlePixelRatio);canvas.height=Math.round(vh*battlePixelRatio)}canvas.style.width=vw+'px';canvas.style.height=vh+'px'}
  const reflected=reflectionCanvas.getContext('2d'),filtered=filterCanvas.getContext('2d');
- for(const context of [reflected,filtered]){context.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);context.clearRect(0,0,vw,vh)}
+ for(const context of [reflected,filtered]){context.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0);context.clearRect(0,0,vw,vh)}
  if(!stageVisuals||activeStage!=='training')return;
  reflected.save();reflected.beginPath();reflected.rect(viewX,viewY,1280*fit,720*fit);reflected.clip();reflected.globalAlpha=stageVisuals.reflection.intensity/255;
  for(const [index,fighter] of [displayP1(),displayP2()].entries()){
@@ -260,7 +260,7 @@ function drawSourceExplods(){
  drawStageVisuals();
  if(groundEffectCanvas.width!==effectCanvas.width||groundEffectCanvas.height!==effectCanvas.height){groundEffectCanvas.width=effectCanvas.width;groundEffectCanvas.height=effectCanvas.height}
  groundEffectCanvas.style.width=innerWidth+'px';groundEffectCanvas.style.height=innerHeight+'px';
- const groundContext=groundEffectCanvas.getContext('2d');groundContext.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);groundContext.clearRect(0,0,innerWidth,innerHeight);
+ const groundContext=groundEffectCanvas.getContext('2d');groundContext.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0);groundContext.clearRect(0,0,innerWidth,innerHeight);
  effectContext.clearRect(0,0,effectCanvas.width,effectCanvas.height);
  const vw=visualViewport?visualViewport.width:innerWidth,vh=visualViewport?visualViewport.height:innerHeight,fit=Math.min(vw/1280,vh/720),viewX=(vw-1280*fit)/2,viewY=(vh-720*fit)/2;
  effectContext.imageSmoothingEnabled=true;
@@ -1951,7 +1951,7 @@ function advanceSimulation(dt){
 function loop(){
  requestAnimationFrame(loop);
  if(gameShell.logoIntro&&!gameShell.logoIntro.finished){clock.getDelta();return}
- if(runtimeFailed)return;
+ if(runtimeFailed)return;if(gameShell.isHome()){clock.getDelta();return}
  try{
   const dt=Math.min(clock.getDelta(),.05);
   if(simPaused){simulationAccumulator=0;advancePausedVisuals(dt);if(stepRequested&&!moveList.active){simStep();stepRequested=false}}
@@ -1960,7 +1960,7 @@ function loop(){
  }catch(e){showRuntimeError(e)}
 }
 requestAnimationFrame(loop);
-function resize(){effectCanvas.width=innerWidth*devicePixelRatio;effectCanvas.height=innerHeight*devicePixelRatio;effectCanvas.style.width=innerWidth+'px';effectCanvas.style.height=innerHeight+'px';effectContext.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);colcv.width=innerWidth*devicePixelRatio;colcv.height=innerHeight*devicePixelRatio;colcv.style.width=innerWidth+'px';colcv.style.height=innerHeight+'px';colctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);const vw=visualViewport?visualViewport.width:innerWidth,vh=visualViewport?visualViewport.height:innerHeight,targetAspect=IK.w/IK.h,screenAspect=vw/vh;let rw=vw,rh=vh;if(screenAspect>targetAspect){rh=vh;rw=rh*targetAspect}else{rw=vw;rh=rw/targetAspect}r.setSize(Math.round(rw),Math.round(rh),false);r.domElement.style.width=rw+'px';r.domElement.style.height=rh+'px';r.domElement.style.left=((vw-rw)/2)+'px';r.domElement.style.top=((vh-rh)/2)+'px';c.aspect=targetAspect;c.updateProjectionMatrix();cv.width=Math.round(vw*devicePixelRatio);cv.height=Math.round(vh*devicePixelRatio);cv.style.width=vw+'px';cv.style.height=vh+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-mcv.width=Math.round(vw*devicePixelRatio);mcv.height=Math.round(vh*devicePixelRatio);mcv.style.width=vw+'px';mcv.style.height=vh+'px';mctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+function resize(){effectCanvas.width=innerWidth*battlePixelRatio;effectCanvas.height=innerHeight*battlePixelRatio;effectCanvas.style.width=innerWidth+'px';effectCanvas.style.height=innerHeight+'px';effectContext.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0);colcv.width=innerWidth*battlePixelRatio;colcv.height=innerHeight*battlePixelRatio;colcv.style.width=innerWidth+'px';colcv.style.height=innerHeight+'px';colctx.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0);const vw=visualViewport?visualViewport.width:innerWidth,vh=visualViewport?visualViewport.height:innerHeight,targetAspect=IK.w/IK.h,screenAspect=vw/vh;let rw=vw,rh=vh;if(screenAspect>targetAspect){rh=vh;rw=rh*targetAspect}else{rw=vw;rh=rw/targetAspect}r.setSize(Math.round(rw),Math.round(rh),false);r.domElement.style.width=rw+'px';r.domElement.style.height=rh+'px';r.domElement.style.left=((vw-rw)/2)+'px';r.domElement.style.top=((vh-rh)/2)+'px';c.aspect=targetAspect;c.updateProjectionMatrix();cv.width=Math.round(vw*battlePixelRatio);cv.height=Math.round(vh*battlePixelRatio);cv.style.width=vw+'px';cv.style.height=vh+'px';ctx.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0);
+mcv.width=Math.round(vw*battlePixelRatio);mcv.height=Math.round(vh*battlePixelRatio);mcv.style.width=vw+'px';mcv.style.height=vh+'px';mctx.setTransform(battlePixelRatio,0,0,battlePixelRatio,0,0)}
 addEventListener('resize',resize);addEventListener('orientationchange',()=>{resize();setTimeout(resize,120);setTimeout(resize,400)});if(window.visualViewport)visualViewport.addEventListener('resize',resize);resize();
 </script></body></html>
