@@ -41,16 +41,14 @@ function mirrorMaterial(opacity, overlay, clock, panorama) {
  material.opacity=opacity;
  return material;
 }
-export function createDiscoInterface(model,camera,panorama,portraitLayer){const regions=new Map(),portraits=new Map(),ray=new THREE.Raycaster(),colors=['#5EDFFF','#FF67BF'];const reflectionTime={mapping:{value:new THREE.Vector3(0,0,-2.0943951)},bloom:{value:new THREE.Vector4(.8,.5,1.75,0)},color:{value:new THREE.Color(0xffffff)},clamp:{value:0}};const rotation=new THREE.Vector3(0,0,-2.0943951),speed=new THREE.Vector3(0,0,4*Math.PI/180),phase=new THREE.Vector3();const backdropColors={SailorMoon:0xff648f,SailorVenus:0xffc86d,SailorJupiter:0x55d597,SailorNeptune:0x00baa8,SailorSaturn:0x8359bf};let players=[],confirmed=[],available=new Set(),time=0;
+export function createDiscoInterface(model,camera,panorama,portraitLayer){const flags={borderGlow:false,trail:false,trailBlur:false,shadow:false};const regions=new Map(),portraits=new Map(),ray=new THREE.Raycaster(),colors=['#5EDFFF','#FF67BF'];const reflectionTime={mapping:{value:new THREE.Vector3(0,0,-2.0943951)},bloom:{value:new THREE.Vector4(.8,.5,1.75,0)},color:{value:new THREE.Color(0xffffff)},clamp:{value:0}};const rotation=new THREE.Vector3(0,0,-2.0943951),speed=new THREE.Vector3(0,0,4*Math.PI/180),phase=new THREE.Vector3();const backdropColors={SailorMoon:0xff648f,SailorVenus:0xffc86d,SailorJupiter:0x55d597,SailorNeptune:0x00baa8,SailorSaturn:0x8359bf};let players=[],confirmed=[],available=new Set(),time=0;
  const portraitMeshes=[];model.traverse(node=>{if(/^Glow[.]/i.test(node.name)||/^Glow[.]/i.test(node.material?.name||''))node.visible=false;if(!node.isMesh)return;const name=node.material.name;if(name.startsWith('Mirror.')){const id=mirrorCharacters[name.slice(7)];const backing=new THREE.Mesh(node.geometry,mirrorMaterial(1,false,reflectionTime,panorama));backing.material.depthWrite=false;backing.renderOrder=2;node.add(backing);node.material=mirrorMaterial(.2,true,reflectionTime,panorama);node.material.depthTest=false;node.renderOrder=4;const backdrop=new THREE.MeshBasicMaterial({color:backdropColors[id]??0x2459a5,depthWrite:false});regions.set(id,{node,backing,backdrop,mirror:backing.material,path:boundary(node.geometry)});}else if(name==='Mirror'){node.material=mirrorMaterial(1,false,reflectionTime,panorama);node.renderOrder=2}else if(portraitIds[name]){node.material=node.material.clone();node.material.transparent=true;node.material.depthWrite=false;node.material.side=THREE.DoubleSide;node.material.alphaTest=.01;node.renderOrder=3;portraits.set(mirrorCharacters[portraitIds[name]],node);if(name==='Tux')node.visible=false;portraitMeshes.push(node)}});
  for(const mesh of portraitMeshes)portraitLayer.attach(mesh);
  function setOpaque(enabled){for(const {node} of regions.values()){node.material.transparent=!enabled;node.material.uniforms.coverage.value=enabled?1:node.material.opacity;node.renderOrder=enabled?2:4}}
  function setSelection(next){players=next.players||[];confirmed=next.confirmed||[];available=new Set(next.available||[]);for(const[id,r]of regions){const factor=players.includes(id)?.05:.2;r.node.material.opacity=factor;r.node.material.uniforms.coverage.value=r.node.material.transparent?factor:1}for(const[id,node]of portraits)node.material.opacity=available.has(id)?1:.35}
  function project(r){r.node.updateWorldMatrix(true,false);return r.path.map(p=>p.clone().multiplyScalar(1.001).applyMatrix4(r.node.matrixWorld).project(camera)).map(v=>({x:(v.x+1)*640,y:(1-v.y)*360}))}
  function draw(ctx){
-  // TEMP diagnostic: plain player-colour borders only; original effects remain below for restoration.
-  ctx.save();ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.lineWidth=2;
-  for(const [id,region] of regions){const player=players.indexOf(id);if(player<0)continue;const points=project(region);if(points.length<3)continue;ctx.strokeStyle=colors[player];ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke()}ctx.restore();return;
+
 
   for(const [id,region] of regions){
    if(!players.includes(id))continue;
@@ -76,7 +74,7 @@ export function createDiscoInterface(model,camera,panorama,portraitLayer){const 
     if(choice!==id)continue;
     const color=colors[player];
     ctx.shadowColor=color;
-    if(confirmed.includes(player)){
+    if(confirmed.includes(player)&&flags.borderGlow){
      for(let i=0;i<region.path.length;i++){
       const j=(i+1)%region.path.length;
       const a=points[i],b=points[j];
@@ -102,12 +100,11 @@ export function createDiscoInterface(model,camera,panorama,portraitLayer){const 
        }
       }
      }
-     ctx.globalAlpha=1;ctx.shadowBlur=12;ctx.strokeStyle=color;ctx.lineWidth=2.5;
+     ctx.globalAlpha=1;ctx.shadowBlur=flags.shadow?12:0;ctx.strokeStyle=color;ctx.lineWidth=2.5;
      ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
      ctx.closePath();ctx.stroke();
-    }else{
-     const head=(time*.22+player*.5)*total;
-     ctx.strokeStyle=color;ctx.shadowBlur=9;
+    }else if(!confirmed.includes(player)&&flags.trail){const head=(time*.22+player*.5)*total;
+     ctx.strokeStyle=color;ctx.shadowBlur=flags.trailBlur?9:0;
      for(let end=169;end>=0;end-=4){
       const start=Math.max(0,end-3),strength=1-(end+start)/340;
       ctx.globalAlpha=strength*strength;ctx.lineWidth=1+strength*3;
@@ -116,13 +113,12 @@ export function createDiscoInterface(model,camera,panorama,portraitLayer){const 
      }
      const {x,y}=pointAt(head),glow=ctx.createRadialGradient(x,y,0,x,y,13);
      glow.addColorStop(0,'white');glow.addColorStop(.25,color);glow.addColorStop(1,color+'00');
-     ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.fillStyle=glow;ctx.fillRect(x-13,y-13,26,26);
-    }
-   }
-   ctx.restore();
+     ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.fillStyle=glow;ctx.fillRect(x-13,y-13,26,26); }else{ctx.globalAlpha=1;ctx.shadowBlur=flags.shadow?12:0;ctx.lineWidth=2;ctx.strokeStyle=color;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();}
+ }
+ ctx.restore();
   }
  }
  function pickCharacter(clientX,clientY){const fit=Math.min(innerWidth/1280,innerHeight/720),x=(clientX-(innerWidth-1280*fit)/2)/fit,y=(clientY-(innerHeight-720*fit)/2)/fit;ray.setFromCamera(new THREE.Vector2(x/640-1,1-y/360),camera);const hit=ray.intersectObjects([...regions.values()].map(r=>r.node),false)[0];if(!hit)return null;return [...regions].find(([id,r])=>r.node===hit.object&&available.has(id))?.[0]||null}
  function navigate(id,dx,dy,ids){const centers=[...regions].filter(([id])=>ids.includes(id)).map(([id,r])=>{const p=project(r);return {id,x:p.reduce((n,p)=>n+p.x,0)/p.length,y:p.reduce((n,p)=>n+p.y,0)/p.length}}),from=centers.find(p=>p.id===id);if(!from)return centers[0]?.id;return centers.filter(p=>(p.x-from.x)*dx+(p.y-from.y)*dy>3).sort((a,b)=>{const score=p=>{const x=p.x-from.x,y=p.y-from.y,d=Math.hypot(x,y),dot=(x*dx+y*dy)/d;return d/(dot**3)};return score(a)-score(b)})[0]?.id||id}
- return {tune({angles,rates,glow,color,clamp,reset}){rotation.fromArray(angles).multiplyScalar(Math.PI/180);speed.fromArray(rates).multiplyScalar(Math.PI/180);reflectionTime.bloom.value.fromArray(glow);reflectionTime.color.value.set(color);reflectionTime.clamp.value=clamp;if(reset)phase.set(0,0,0)},setOpaque,setSelection,pickCharacter,navigateCharacter:navigate,draw,step:dt=>{time+=dt;phase.addScaledVector(speed,dt);reflectionTime.mapping.value.copy(rotation).add(phase)},snapshot:()=>({fixed:true,regions:[...regions].map(([id,r])=>({id,points:r.path.length,factor:r.node.material.opacity})),players:[...players],confirmed:[...confirmed],colors})};
+ return {setDiagnostic:(name,value)=>{if(name in flags)flags[name]=value},tune({angles,rates,glow,color,clamp,reset}){rotation.fromArray(angles).multiplyScalar(Math.PI/180);speed.fromArray(rates).multiplyScalar(Math.PI/180);reflectionTime.bloom.value.fromArray(glow);reflectionTime.color.value.set(color);reflectionTime.clamp.value=clamp;if(reset)phase.set(0,0,0)},setOpaque,setSelection,pickCharacter,navigateCharacter:navigate,draw,step:dt=>{time+=dt;phase.addScaledVector(speed,dt);reflectionTime.mapping.value.copy(rotation).add(phase)},snapshot:()=>({fixed:true,regions:[...regions].map(([id,r])=>({id,points:r.path.length,factor:r.node.material.opacity})),players:[...players],confirmed:[...confirmed],colors})};
 }

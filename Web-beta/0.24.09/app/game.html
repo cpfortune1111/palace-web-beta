@@ -59,7 +59,7 @@ body:not([data-battle-ui="visible"]) :is(#hud,#inputPanel,#debugBtns,#ctrl,#touc
 body:not([data-battle-ui="visible"]) #battlePauseButtons{display:none}
 body[data-touch-mirrored="true"] #ctrl{left:auto!important;right:34px!important}
 body[data-touch-mirrored="true"] #touchAttacks{right:auto;left:24px}
-</style><link rel="icon" href="../icon-192.png"><link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><meta name="theme-color" content="#211742"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="color-scheme" content="light dark"><meta name="darkreader-lock"><style>:root{color-scheme:light dark}html,body{background:#211742!important}*{forced-color-adjust:none}</style><style>html,body{-webkit-text-size-adjust:none;text-size-adjust:none}#settingsPage{isolation:isolate}#settingsPage label{white-space:nowrap}</style><meta name="supported-color-schemes" content="light dark"><style>@media(prefers-color-scheme:dark){:root{color-scheme:dark}html,body{background:#211742!important;color:#fff}}canvas,img,svg{forced-color-adjust:none}</style><style>#palaceSelection,#palaceSelection *{box-shadow:none!important;text-shadow:none!important}</style><style>body[data-pause-ui="true"] :is(#ctrl,#touchAttacks){display:none!important}</style></head>
+</style><link rel="icon" href="../icon-192.png"><link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><meta name="theme-color" content="#211742"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="color-scheme" content="light dark"><meta name="darkreader-lock"><style>:root{color-scheme:light dark}html,body{background:#211742!important}*{forced-color-adjust:none}</style><style>html,body{-webkit-text-size-adjust:none;text-size-adjust:none}#settingsPage{isolation:isolate}#settingsPage label{white-space:nowrap}</style><meta name="supported-color-schemes" content="light dark"><style>@media(prefers-color-scheme:dark){:root{color-scheme:dark}html,body{background:#211742!important;color:#fff}}canvas,img,svg{forced-color-adjust:none}</style><style>#palaceSelection[data-shadows="off"],#palaceSelection[data-shadows="off"] *{box-shadow:none!important;text-shadow:none!important}</style><style>body[data-pause-ui="true"] :is(#ctrl,#touchAttacks){display:none!important}</style></head>
 <body><script type="module">import {createLoadingScreen} from './Engine/loading-screen.js';const bootLoading=createLoadingScreen(document.body,'initialGameLoading');bootLoading.show();const ready=new MutationObserver(()=>{if(document.getElementById('importantNotice')||document.getElementById('logoIntro')){bootLoading.hide();document.getElementById('initialGameLoading')?.remove();ready.disconnect()}});ready.observe(document.body,{childList:true,subtree:true});</script><div id="app"></div><canvas id="venus"></canvas><canvas id="mars"></canvas><canvas id="collision"></canvas><div id="hud"><b>Web beta 0.24.09 · Disco Mirrors / Projectile Priority</b><div id="buildid" style="font-size:12px;opacity:.72;margin-top:2px">BUILD baseline-02408-r39-20261030</div><div id="status">Downloading StageTraining.glb…</div><div id="detail">0 / ? MB</div><div id="pbar"><div id="pfill"></div></div><div id="hudCamera">CAMERA</div><div id="act">Action 0 · Idle</div></div><div id="debugBtns"><select id="dbgBoxes" aria-label="Collision boxes"><option value="none">NO CLSN</option><option value="hurt">SHOW HURTBOX</option><option value="hit">SHOW HITBOX</option><option value="both">SHOW BOXES</option></select><button id="dbgPlay" aria-label="Play">▶</button><button id="dbgPause" aria-label="Pause / step">Ⅱ</button><button id="dbgTrace" aria-label="Export match log" title="Export entire match log">EXPORT LOG</button><button id="dbgMark" title="Mark the current problem time">MARK</button></div>
 <div id="ctrl"><div id="touchShoulders"><button id="atkL" class="touchButton" data-action="l" aria-label="L">L</button><button id="atkR" class="touchButton" data-action="r" aria-label="R">R</button></div><div id="stick"><div id="stickKnob"></div></div></div><div id="touchAttacks"><button id="atkA" class="touchButton" data-action="a" aria-label="A attack">A</button><button id="atkB" class="touchButton" data-action="b" aria-label="B attack">B</button><button id="atkX" class="touchButton" data-action="x" aria-label="X attack">X</button><button id="atkY" class="touchButton" data-action="y" aria-label="Y attack">Y</button></div>
 <div id="inputPanel"><label for="inputMode">Input </label><select id="inputMode"><option value="auto">Auto / 自動</option><option value="keyboard">Keyboard / 鍵盤</option><option value="touch">Touch / 觸控</option></select><div id="inputHint" aria-live="polite"></div><label> P2 <select id="p2Guard"><option value="none">不防禦</option><option value="stand">站立防禦</option><option value="crouch">蹲下防禦</option></select></label><label> 控制 <select id="p2Control"><option value="dummy">Dummy / 測試</option><option value="keyboard">Keyboard / Numpad</option></select></label><button id="p2Punch" style="font-size:11px;padding:3px 6px;margin-left:6px;border-radius:4px" title="Numpad0 / 地面單次出拳測試，非 AI">P2 出拳測試</button></div>
@@ -72,6 +72,8 @@ import {createPageBackground} from './Engine/page-background.js?v=uiPolish1';
 createPageBackground().ready.catch(error=>console.error('Page background',error));
 import {assetUrl} from './Engine/asset-paths.js?v=02362';
 import {applyStateVelocity} from './Engine/state-entry-velocity.js?v=02408r13';
+import {releaseQuoteImages} from './Engine/quote-animation.js';
+import {createResidentSprites} from './Engine/resident-sprites.js';
 import {createBattleAudio} from './Engine/battle-audio.js?v=02408r13';
 import {createHitSoundPolicy} from './Engine/hit-sound-policy.js?v=02408r39';
 const hitSoundPolicy=createHitSoundPolicy();
@@ -81,7 +83,7 @@ const sourceWidth=createSourceWidth();
 import {hitDefDefaults} from './Engine/hitdef-defaults.js?v=02408r39';
 import {hitVelocityVector} from './Engine/hit-velocity-defaults.js?v=02408r39';
 import {primeRoundPortraits} from './Engine/round-portraits.js?v=02408r39';
-const battleAudio=createBattleAudio();
+const battleAudio=createBattleAudio();const residentSprites=createResidentSprites();
 import {createMatchLog} from './Engine/match-log.js?v=02408r13';
 const matchLog=createMatchLog();
 import * as THREE from 'three'; import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
@@ -114,7 +116,7 @@ const app=document.querySelector('#app'),status=document.querySelector('#status'
 let hudCollapsed=true;hud.classList.add('collapsed');
 const moveList=createBattlePause({members:()=>battleCharacters.map((character,i)=>({character,mode:hardwareModes[i]})),canPause:()=>roundFlow.canFight()&&!runtimeFailed&&!gameShell.isHome(),pause:()=>{resetPlayerInput();simPaused=true;stepRequested=false},resume:()=>{resetPlayerInput();simPaused=false;stepRequested=false},shell:()=>gameShell,bindings:{get:()=>keyboardBindings,get defaults(){return defaultBindings},save:next=>saveKeyboardBindings(next)}});
 let simPaused=false,stepRequested=false;
-const gameShell=createPalaceMenu({pause:value=>{simPaused=value},prepareStage,ready:onProgress=>new Promise((resolve,reject)=>{const wait=setInterval(()=>{if(runtimeFailed||/ERROR/.test(status.textContent)){clearInterval(wait);reject(Error(status.textContent));return}const groups=[throwSpriteDat,reactionDat,battleDat,stateIR,lifecycleDat,dat,cmdDat,attackDat,gethitDat,turnDat,guardDat,fallDat,airDat,specialDat,roundConfig.matchWins,roundCharDat,roundFxDat,stageCameraReady,roundAudioReady,stageModel],done=groups.filter(Boolean).length;onProgress?.(done/(groups.length+2));if(done===groups.length){clearInterval(wait);Promise.all([fightHud.ready,roundView.ready,hardwareIndicator.ready]).then(()=>{onProgress?.(1);resolve()},reject)}},50)}),prepareCharacters,bindings:{get:()=>keyboardBindings,get defaults(){return defaultBindings},save:next=>saveKeyboardBindings(next)},start:(mode,timer,choice)=>{matchLog.begin({version:'0.24.09',mode,timer,characters:[...battleCharacters],hardware:choice?.hardware,command:choice?.command},combatTraceTick);battleAbilities=[0,1].map(player=>{const points=mode==='training'?Array(6).fill(0):choice?.acs?.[player]||Array(6).fill(0);if(points.reduce((sum,value)=>sum+value,0)>abilityBudget(mode))throw Error('ACS point budget exceeded');return abilityProfile(points)});p1LifeMax=1000*battleAbilities[0].hp;p2.lifeMax=1000*battleAbilities[1].hp;setP2ControlMode(mode==='vs'?'keyboard':'dummy');if(choice)for(const player of [1,2]){const root=specialRoot(player);hardwareModes[player-1]='snes';root.vars[50]=['snes','3do','saturn'].indexOf(hardwareModes[player-1]);setCommandMode(choice.command[player-1],player)}roundFlow.begin(mode,timer)}});
+const gameShell=createPalaceMenu({pause:value=>{simPaused=value},prepareStage,ready:onProgress=>new Promise((resolve,reject)=>{const wait=setInterval(()=>{if(runtimeFailed||/ERROR/.test(status.textContent)){clearInterval(wait);reject(Error(status.textContent));return}const groups=[throwSpriteDat,reactionDat,battleDat,stateIR,lifecycleDat,dat,cmdDat,attackDat,gethitDat,turnDat,guardDat,fallDat,airDat,specialDat,roundConfig.matchWins,roundCharDat,roundFxDat,stageCameraReady,roundAudioReady,stageModel,stageVisuals,stageFilterImage,commonFallDat,commonFallAtlas],done=groups.filter(Boolean).length;onProgress?.(done/(groups.length+2));if(done===groups.length){clearInterval(wait);Promise.all([fightHud.ready,roundView.ready,hardwareIndicator.ready,moveList.ready]).then(()=>{onProgress?.(1);resolve()},reject)}},50)}),prepareCharacters,releasePresentation:releaseQuoteImages,bindings:{get:()=>keyboardBindings,get defaults(){return defaultBindings},save:next=>saveKeyboardBindings(next)},start:(mode,timer,choice)=>{if(!globalThis.__palaceBattlePrepared||!residentSprites.snapshot().ready)throw Error('Battle resources are not prepared');matchLog.begin({version:'0.24.09',mode,timer,characters:[...battleCharacters],hardware:choice?.hardware,command:choice?.command},combatTraceTick);battleAbilities=[0,1].map(player=>{const points=mode==='training'?Array(6).fill(0):choice?.acs?.[player]||Array(6).fill(0);if(points.reduce((sum,value)=>sum+value,0)>abilityBudget(mode))throw Error('ACS point budget exceeded');return abilityProfile(points)});p1LifeMax=1000*battleAbilities[0].hp;p2.lifeMax=1000*battleAbilities[1].hp;setP2ControlMode(mode==='vs'?'keyboard':'dummy');if(choice)for(const player of [1,2]){const root=specialRoot(player);hardwareModes[player-1]='snes';root.vars[50]=['snes','3do','saturn'].indexOf(hardwareModes[player-1]);setCommandMode(choice.command[player-1],player)}roundFlow.begin(mode,timer)}});
 gameShell.ready.catch(showRuntimeError);
 const dbgPlay=document.querySelector('#dbgPlay'),dbgPause=document.querySelector('#dbgPause'),dbgBoxes=document.querySelector('#dbgBoxes');
 let showCollision=false;let collisionMode='none';
@@ -266,11 +268,11 @@ function drawSourceExplods(){
  effectContext.imageSmoothingEnabled=true;
  for(const effect of [...specialRuntime.entities.filter(entity=>!entity.invisible).map(entity=>({...entity,entity:true,sprpriority:entity.sprPriority})),...sourceExplods].sort((left,right)=>Number(!!left.ontop)-Number(!!right.ontop)||(left.sprpriority??0)-(right.sprpriority??0))){if(effect.readySpark){const alpha=effect.age<=effect.fadeStart?1:Math.max(0,(effect.fadeEnd-effect.age)/(effect.fadeEnd-effect.fadeStart));superSparks.draw(effectContext,{character:effect.character,variant:effect.variant,age:effect.age,x:viewX+worldScreenX(effect.x)*fit,y:viewY+worldScreenY(effect.y)*fit,scale:fit*cameraZoom,alpha});continue}if(effect.roundFx&&effect.anim>=930&&effect.anim<=937){const root=specialRoot(effect.player);if(root.state>=190&&root.state<=199)hardwareIndicator.draw(effectContext,hardwareModes[effect.player-1],viewX+worldScreenX(effect.x)*fit,viewY+worldScreenY(effect.y)*fit,fit);continue}let elapsed=0;const frames=effect.roundFx?roundFxDat.actions[String(effect.anim)]:effect.common?commonFallDat.actions[String(effect.anim)]:framesFor(effect.anim,effect.player,true),frame=effect.roundFx?frames[effect.age%frames.length]:effect.entity?frames[effect.elem-1]:(profileFor(effect.player)?.data||lifecycleDat)?.actions?.[String(effect.anim)]?lifecycleEffectFrame(effect):frames.find(frame=>{elapsed+=Math.max(1,frame.time);return effect.age<elapsed});if(!frame)continue;
   const sprite=effect.roundFx?roundFxDat.sprites[frame.group+','+frame.item]:effect.common?commonFallDat.sprites[frame.group+','+frame.item]:spriteFor(frame);let source=effect.common||effect.roundFx?null:spriteCanvasFor(frame);if(!sprite)continue;
-  if(effect.common||effect.roundFx){source=document.createElement('canvas');source.width=sprite.w;source.height=sprite.h;source.getContext('2d').drawImage(effect.roundFx?roundFxAtlases[sprite.page]:commonFallAtlas,sprite.x,sprite.y,sprite.w,sprite.h,0,0,sprite.w,sprite.h)}
+  if(effect.common||effect.roundFx){source=residentSprites.get(effect.roundFx?roundFxAtlases[sprite.page]:commonFallAtlas,sprite)}
   if(!source)continue;
   const drawing=!effect.ontop&&!effect.screen&&effect.sprpriority<Math.min(displayP1().sprPriority,displayP2().sprPriority)?groundContext:effectContext;
   const airFlip=String(frame.flip||'').toUpperCase();
-  drawing.save();drawing.globalCompositeOperation=frame.blend?.trim().toUpperCase()==='A'?'lighter':'source-over';drawing.translate(viewX+(effect.screen?(effect.screenRight?1280:0)+effect.x:worldScreenX(effect.x))*fit,viewY+(effect.screen?effect.y:worldScreenY(effect.y))*fit);drawing.scale((effect.screen?1:effect.facing*cameraZoom)*fit*(effect.scale?.[0]??1)*(airFlip.includes('H')?-1:1),fit*(effect.screen?1:cameraZoom)*(effect.scale?.[1]??1)*(airFlip.includes('V')?-1:1));drawing.drawImage(source,-sprite.axisX+frame.ox,-sprite.axisY+frame.oy,sprite.w,sprite.h);drawing.restore();
+  drawing.save();drawing.globalCompositeOperation=frame.blend?.trim().toUpperCase()==='A'?'lighter':'source-over';drawing.translate(viewX+(effect.screen?(effect.screenRight?1280:0)+effect.x:worldScreenX(effect.x))*fit,viewY+(effect.screen?effect.y:worldScreenY(effect.y))*fit);drawing.scale((effect.screen?1:effect.facing*cameraZoom)*fit*(effect.scale?.[0]??1)*(airFlip.includes('H')?-1:1),fit*(effect.screen?1:cameraZoom)*(effect.scale?.[1]??1)*(airFlip.includes('V')?-1:1));residentSprites.draw(drawing,source,-sprite.axisX+frame.ox,-sprite.axisY+frame.oy,sprite.w,sprite.h);drawing.restore();
  }
 }
 function playSourceSound(value,channel=-1,player=characterScopePlayer,options={}){
@@ -316,9 +318,9 @@ Promise.all([
 const mcv=document.querySelector('#mars'),mctx=mcv.getContext('2d');
 function p2Data(){return dat}
 function p2AtlasFor(f){return atlasFor(f)}
-function drawFighterAIR(context,source,sprite,frame,x,y,facing,scale){const flip=String(frame.flip||'').toUpperCase();context.save();context.translate(x+frame.ox*facing*scale,y+frame.oy*scale);context.scale(facing*(flip.includes('H')?-1:1)*scale,(flip.includes('V')?-1:1)*scale);context.drawImage(source,-sprite.axisX,-sprite.axisY,sprite.w,sprite.h);context.restore()}
+function drawFighterAIR(context,source,sprite,frame,x,y,facing,scale){const flip=String(frame.flip||'').toUpperCase();context.save();context.translate(x+frame.ox*facing*scale,y+frame.oy*scale);context.scale(facing*(flip.includes('H')?-1:1)*scale,(flip.includes('V')?-1:1)*scale);residentSprites.draw(context,source,-sprite.axisX,-sprite.axisY,sprite.w,sprite.h);context.restore()}
 function drawMars(){return withCharacter(2,()=>drawMarsForCharacter())}
-function drawAfterImages(context,player){const trail=afterImages[player-1];if(!trail)return;const fit=Math.min((visualViewport?.width||innerWidth)/1280,(visualViewport?.height||innerHeight)/720),left=((visualViewport?.width||innerWidth)-1280*fit)/2,top=((visualViewport?.height||innerHeight)-720*fit)/2;for(const [index,fighter] of trail.frames.entries()){const frame=framesFor(fighter.anim,player)[fighter.elem-1],sprite=frame&&spriteFor(frame),source=frame&&spriteCanvasFor(frame);if(!sprite||!source)continue;context.save();context.globalAlpha=.5*(index+1)/Math.max(1,trail.length);context.translate(left+worldScreenX(fighter.x)*fit,top+worldScreenY(fighter.y)*fit);context.scale(fighter.facing*fit*cameraZoom,fit*cameraZoom);context.drawImage(source,-sprite.axisX+frame.ox,-sprite.axisY+frame.oy);context.restore()}}
+function drawAfterImages(context,player){const trail=afterImages[player-1];if(!trail)return;const fit=Math.min((visualViewport?.width||innerWidth)/1280,(visualViewport?.height||innerHeight)/720),left=((visualViewport?.width||innerWidth)-1280*fit)/2,top=((visualViewport?.height||innerHeight)-720*fit)/2;for(const [index,fighter] of trail.frames.entries()){const frame=framesFor(fighter.anim,player)[fighter.elem-1],sprite=frame&&spriteFor(frame),source=frame&&spriteCanvasFor(frame);if(!sprite||!source)continue;context.save();context.globalAlpha=.5*(index+1)/Math.max(1,trail.length);context.translate(left+worldScreenX(fighter.x)*fit,top+worldScreenY(fighter.y)*fit);context.scale(fighter.facing*fit*cameraZoom,fit*cameraZoom);residentSprites.draw(context,source,-sprite.axisX+frame.ox,-sprite.axisY+frame.oy);context.restore()}}
 function stepAfterImages(){for(const player of [1,2]){const trail=afterImages[player-1];if(!trail)continue;if(trail.remaining>0&&combatTraceTick%trail.gap===0)trail.frames.push({...specialRoot(player)});if(trail.frames.length>trail.length||trail.remaining<=0)trail.frames.shift();trail.remaining--;if(!trail.frames.length&&trail.remaining<=0)afterImages[player-1]=null}}
 function drawMarsForCharacter(){
  mctx.clearRect(0,0,mcv.width,mcv.height);
@@ -574,7 +576,7 @@ function withCharacter(player,callback){
  if(profile){battleDat=profile.battle;stateIR=profile.states;cmdDat=profile.commands}
  try{return callback()}finally{[battleDat,stateIR,cmdDat,characterScopePlayer]=saved}
 }
-async function prepareCharacters(players=['SailorVenus','SailorVenus'],onProgress=()=>{}){
+async function prepareCharacters(players=['SailorVenus','SailorVenus'],onProgress=()=>{}){globalThis.__palaceBattlePrepared=false;
  onProgress(0);
  await Promise.all([...new Set(players)].map(loadGiantSwingSupplement));
  await Promise.all([...new Set(players)].filter(c=>!['SailorVenus','SailorMoon'].includes(c)).map(loadThrowSupplement));
@@ -603,7 +605,7 @@ async function prepareCharacters(players=['SailorVenus','SailorVenus'],onProgres
   const actions=Object.fromEntries(Object.entries(all.actions).filter(([key])=>actionIds.has(Number(key))&&![951,953].includes(Number(key))));
   const data={...all,actions},pages=new Set(),images=[];
   for(const frames of Object.values(actions))for(const frame of frames){frameProfiles.set(frame,character);if(!frame.empty)pages.add(data.sprites[frame.group+','+frame.item].page)}
-  let pagesDone=0;await Promise.all([...pages].map(page=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{characterProgress(.15+.85*(++pagesDone/Math.max(1,pages.size)));resolve()};image.onerror=()=>reject(Error(character+' atlas '+page));image.src=base+data.atlasFiles[page]+'?v=02408';images[page]=image})));
+  for(let page=0;page<data.atlasFiles.length;page++)pages.add(page);let pagesDone=0;await Promise.all([...pages].map(page=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{characterProgress(.15+.85*(++pagesDone/Math.max(1,pages.size)));resolve()};image.onerror=()=>reject(Error(character+' atlas '+page));image.src=base+data.atlasFiles[page]+'?v=02408';images[page]=image})));
   fightHud.setCharacterEmblem(character,data,images);
   characterProfiles.set(character,{battle,states:{states:battle.states,constants:battle.constants},commands:{commands:battle.commands},data,images,sounds,soundBase:'./Char/'+folder+'/Sound/'});characterDone++;characterProgress(0);
  }
@@ -613,7 +615,7 @@ async function prepareCharacters(players=['SailorVenus','SailorVenus'],onProgres
  const aliases=await fetch(assetUrl('./Data/asset-layout.json')).then(r=>{if(!r.ok)throw Error('Battle audio index');return r.json()});
  const urls=Object.keys(aliases).filter(name=>name.startsWith('round-sounds/')||name.startsWith('battle-sounds/common-')||players.includes('SailorVenus')&&name.startsWith('battle-sounds/')).map(name=>assetUrl('./'+name));
  for(const character of new Set(players)){const p=characterProfiles.get(character);if(p.sounds)for(const sound of Object.values(p.sounds))urls.push(p.soundBase+sound.file)}
- await battleAudio.prepare(urls,value=>onProgress(.7+.3*value));onProgress(1);
+ await battleAudio.prepare(urls,value=>onProgress(.7+.15*value));await prepareResidentBattleSprites(players,value=>onProgress(.85+.15*value));globalThis.__palaceBattlePrepared=true;onProgress(1);
 }
 const ownForeignFrames=foreignFrameResolver((frame,character)=>frameProfiles.set(frame,character));
 function framesFor(anim,player=characterScopePlayer,ownAnimation=false){
@@ -625,21 +627,25 @@ function framesFor(anim,player=characterScopePlayer,ownAnimation=false){
 function venusFramesFor(anim){return (roundCharDat?.actions?.[String(anim)]||lifecycleDat?.actions?.[String(anim)]||specialDat?.actions?.[String(anim)]||airDat?.actions?.[String(anim)]||reactionDat?.actions?.[String(anim)]||fallDat?.actions?.[String(anim)]||guardDat?.actions?.[String(anim)]||gethitDat?.actions?.[String(anim)]||turnDat?.actions?.[String(anim)]||attackDat?.actions?.[String(anim)]||dat?.actions?.[String(anim)]||[])}
 function spriteFor(frame){const extra=giantSwingSupplements.get(frameProfiles.get(frame));if(extra?.data.sprites[frame.group+','+frame.item])return extra.data.sprites[frame.group+','+frame.item];const profile=characterProfiles.get(frameProfiles.get(frame));if(profile?.data)return profile.data.sprites[frame.group+','+frame.item]||throwSpriteSupplements.get(frameProfiles.get(frame))?.data.sprites[frame.group+','+frame.item];const k=frame.group+','+frame.item;return throwSpriteDat?.sprites?.[k]||reactionDat?.sprites?.[k]||roundCharDat?.sprites?.[k]||lifecycleDat?.sprites?.[k]||specialDat?.sprites?.[k]||airDat?.sprites?.[k]||fallDat?.sprites?.[k]||guardDat?.sprites?.[k]||turnDat?.sprites?.[k]||gethitDat?.sprites?.[k]||attackDat?.sprites?.[k]||dat?.sprites?.[k]}
 function atlasFor(frame){const extra=giantSwingSupplements.get(frameProfiles.get(frame)),sprite=extra?.data.sprites[frame.group+','+frame.item];if(sprite)return extra.images[sprite.page||0];const profile=characterProfiles.get(frameProfiles.get(frame));if(profile?.data){const k=frame.group+','+frame.item,own=profile.data.sprites[k],extra=throwSpriteSupplements.get(frameProfiles.get(frame));return own?profile.images[own.page]:extra?.images[extra.data.sprites[k]?.page]}const k=frame.group+','+frame.item;if(throwSpriteDat?.sprites?.[k])return throwSpriteAtlases[throwSpriteDat.sprites[k].page];if(reactionDat?.sprites?.[k])return reactionAtlases[reactionDat.sprites[k].page];if(roundCharDat?.sprites?.[k])return roundCharAtlases[roundCharDat.sprites[k].page];if(lifecycleDat?.sprites?.[k])return lifecycleAtlases[lifecycleDat.sprites[k].page];if(specialDat?.sprites?.[k])return specialAtlases[specialDat.sprites[k].page];if(airDat?.sprites?.[k])return airAtlas;if(fallDat?.sprites?.[k])return fallAtlas;if(guardDat?.sprites?.[k])return guardAtlas;if(turnDat?.sprites?.[k])return turnAtlas;if(gethitDat?.sprites?.[k])return gethitAtlas;return attackDat?.sprites?.[k]?attackAtlas:atlas}
-const spriteCanvasCache=new WeakMap();
-function spriteCanvasFor(frame){
- const source=atlasFor(frame),sprite=spriteFor(frame);
- if(!source?.complete||!source.naturalWidth||!sprite)return null;
- let cache=spriteCanvasCache.get(source);if(!cache){cache=new Map();spriteCanvasCache.set(source,cache)}
- const key=[sprite.x,sprite.y,sprite.w,sprite.h].join(',');
- if(!cache.has(key)){
-  const canvas=document.createElement('canvas');canvas.width=sprite.w;canvas.height=sprite.h;
-  const context=canvas.getContext('2d');context.imageSmoothingEnabled=false;
-  context.drawImage(source,sprite.x,sprite.y,sprite.w,sprite.h,0,0,sprite.w,sprite.h);
-  cache.set(key,canvas);
+function spriteCanvasFor(frame){if(!frame||frame.empty||frame.group<0||frame.item<0)return null;const sprite=spriteFor(frame);if(!sprite||sprite.w<1||sprite.h<1)return null;return residentSprites.get(atlasFor(frame),sprite)}
+ async function prepareResidentBattleSprites(players,progress){
+  const entries=[];const add=frame=>{if(frame.empty||frame.group<0||frame.item<0)return;const sprite=spriteFor(frame),source=atlasFor(frame);if(!sprite)throw Error('Missing configured battle sprite '+frame.group+','+frame.item);entries.push({source,sprite,priority:frame.group<1000||(frame.group>=5000&&frame.group<6000)||(sprite.h>200&&sprite.w/sprite.h<.75)})};
+  for(const character of new Set(players)){
+   const profile=characterProfiles.get(character);
+   if(profile?.data){for(const frames of Object.values(profile.data.actions))for(const frame of frames)add(frame)}
+   else for(const data of [throwSpriteDat,reactionDat,roundCharDat,lifecycleDat,specialDat,airDat,fallDat,guardDat,gethitDat,turnDat,attackDat,dat])for(const frames of Object.values(data?.actions||{}))for(const frame of frames)add(frame);
+   for(const extra of [giantSwingSupplements.get(character),throwSpriteSupplements.get(character)])if(extra)for(const frames of Object.values(extra.data.actions||{}))for(const frame of frames){frameProfiles.set(frame,character);add(frame)}
+  }
+  for(const character of new Set(players)){const p=characterProfiles.get(character);for(const bundle of [p?.data?{data:p.data,images:p.images}:null,giantSwingSupplements.get(character),throwSpriteSupplements.get(character)])if(bundle)for(const [key,sprite]of Object.entries(bundle.data.sprites)){const source=bundle.images[sprite.page||0],group=Number(key.split(',')[0]);if(source&&sprite.w>0&&sprite.h>0)entries.push({source,sprite,priority:group<1000||(group>=5000&&group<6000)||(sprite.h>200&&sprite.w/sprite.h<.75)})}}
+  if(players.includes('SailorVenus'))for(const data of [throwSpriteDat,reactionDat,roundCharDat,lifecycleDat,specialDat,airDat,fallDat,guardDat,gethitDat,turnDat,attackDat,dat])for(const [key,sprite]of Object.entries(data?.sprites||{})){const [group,item]=key.split(',').map(Number);if(group>=0&&item>=0&&sprite.w>0&&sprite.h>0)add({group,item})}
+  for(const [data,images] of [[roundFxDat,roundFxAtlases],[commonFallDat,[commonFallAtlas]]])for(const sprite of Object.values(data.sprites))if(sprite.w>0&&sprite.h>0)entries.push({source:images[sprite.page||0],sprite});
+  const rawExpressions=new Set();const collect=value=>{if(typeof value==='string')rawExpressions.add(value.trim());else if(value&&typeof value==='object')for(const v of Object.values(value))collect(v)};
+  const scan=value=>{if(!value||typeof value!=='object')return;for(const [key,v]of Object.entries(value)){if(['triggerall','triggers','params'].includes(key))collect(v);else if(v&&typeof v==='object')scan(v)}};
+  for(const character of new Set(players))scan(characterProfiles.get(character)?.battle);
+  for(const raw of rawExpressions)if(!/\b(?:command|helper|enemynear|enemy|root|parent|animelem)\b/i.test(raw))try{fastExprCache.set(raw,parseExprAST(raw))}catch{}
+  await superSparks.prepare(players);await residentSprites.prepare(entries,progress);residentSprites.warm([ctx,mctx,effectContext,reflectionCanvas.getContext('2d')]);
  }
- return cache.get(key);
-}
-function actionDuration(anim,player=characterScopePlayer){
+ function actionDuration(anim,player=characterScopePlayer){
  const fs=framesFor(anim,player);let total=0;
  for(const q of fs) total+=q.time<0?0:Math.max(1,q.time);
  return Math.max(1,total);
@@ -834,7 +840,7 @@ function evalAST(n,context=null){const elementTime=context?.elemTime||animElemTi
  if(n.t==='bin'){if(n.op==='&&')return !!evalAST(n.a,context)&&!!evalAST(n.b,context);if(n.op==='||')return !!evalAST(n.a,context)||!!evalAST(n.b,context);let a=evalAST(n.a,context),b=evalAST(n.b,context);if(n.op==='='||n.op==='==')return a==b;if(n.op==='!=')return a!=b;if(n.op==='>')return a>b;if(n.op==='<')return a<b;if(n.op==='>=')return a>=b;if(n.op==='<=')return a<=b;if(n.op==='+')return +a + +b;if(n.op==='-')return a-b;if(n.op==='*')return a*b;if(n.op==='/')return a/b;if(n.op==='%')return a%b}
  if(n.t==='call'){let f=n.name.toLowerCase();if(['projcontact','projhit','projguarded'].includes(f))return +specialRuntime.projectileEvent(context?.player||characterScopePlayer,Number(evalAST(n.args[0],context)),{projcontact:'contact',projhit:'hit',projguarded:'guarded'}[f]);if(f==='ln')return Math.log(evalAST(n.args[0],context));if(['sin','cos','tan','asin','acos','atan','exp'].includes(f))return Math[f](evalAST(n.args[0],context));if(f==='floor')return Math.floor(evalAST(n.args[0],context));if(f==='selfanimexist')return framesFor(evalAST(n.args[0],context)).length>0;if(f==='const720p')return evalAST(n.args[0],context);if(f==='animelemtime')return elementTime(evalAST(n.args[0],context));if(f==='abs')return Math.abs(evalAST(n.args[0],context));if(f==='const')return constVal(n.args[0].t==='id'?n.args[0].name:evalAST(n.args[0],context),context?.player||characterScopePlayer);if(f==='var')return (context?context.vars:runtimeVar)[+evalAST(n.args[0],context)]||0;if(f==='fvar')return context?.fvars?.[+evalAST(n.args[0],context)]||0;if(f==='sysvar')return (context?context.sysvars:runtimeSysVar)[+evalAST(n.args[0],context)]||0;if(f==='ifelse'||f==='cond')return evalAST(n.args[0],context)?evalAST(n.args[1],context):evalAST(n.args[2],context);throw Error('AST function '+n.name)}throw Error('AST node')}
 const exprCache=new Map();
-function evalM1(expr,context=null){let src=String(expr).trim();
+const fastExprCache=new Map();function evalM1(expr,context=null){const raw=String(expr).trim();const fast=fastExprCache.get(raw);if(fast){if(!context&&/\b(?:LifeMax|Life|HitCount)\b/i.test(raw))context=specialRuntime.context(specialRoot(1));return evalAST(fast,context)}let src=raw;
  src=src.replace(/\bHelper\s*\(\s*(\d+)\s*\)\s*,\s*var\s*\(\s*(\d+)\s*\)/gi,(_,id,index)=>String((context||fighterExpressionContext(specialRoot(1),specialRoot(2))).helperVar(Number(id),Number(index))));
  src=src.replace(/\bEnemyNear\s*\(\s*0\s*\)\s*,/gi,'EnemyNear,');
  src=src.replace(/\b(EnemyNear|Enemy|Root|Parent)\s*,\s*HitDefAttr\s*(!=|=)\s*([SCA]+)\s*,\s*([A-Z]{2}(?:\s*,\s*[A-Z]{2})*)/gi,(_,redirect,operator,states,attacks)=>(operator==='!='?'!':'')+'RedirectAttr('+[redirect,states,...attacks.split(',').map(value=>value.trim())].map(value=>JSON.stringify(value)).join(',')+')');
@@ -842,7 +848,7 @@ function evalM1(expr,context=null){let src=String(expr).trim();
  src=src.replace(/\broot\s*,\s*var\s*\(/gi,'RootVar(');
  src=src.replace(/\bAnimElem\s*=\s*(\d+)\s*,\s*(-?\d+)/gi,(_,element,time)=>'AnimElemTime('+element+') = '+time);
  src=src.replace(/\bcommand\s*(!=|=)\s*"([^"]+)"/gi,(_,op,name)=>{if(!hasCommandDef(name))throw Error('CMD undefined command: '+name);const on=context?context.command(name):commandActive(name);return (op==='!='?!on:on)?'1':'0'});
- let a=exprCache.get(src);if(!a){try{a=parseExprAST(src)}catch(error){throw Error(error.message+' in '+src)}exprCache.set(src,a)}return evalAST(a,context)}
+ let a=exprCache.get(src);if(!a){try{a=parseExprAST(src)}catch(error){throw Error(error.message+' in '+src)}exprCache.set(src,a)}if(!/\b(?:command|helper)\b/i.test(raw))fastExprCache.set(raw,a);return evalAST(a,context)}
 function controllerTriggered(c,context=null){
  if(!c.triggers)return null;
  if((c.triggerall||[]).some(x=>!evalM1(x,context)))return false;
@@ -1778,7 +1784,7 @@ document.querySelector('#dbgMark').addEventListener('click',()=>{const mark=matc
 function recordMatchLog(){matchLog.record(combatTraceTick,roundFlow.snapshot().phase,{...p1ExpressionFighter(),hitPause:p1HitPause},{...p2,hitPause:p2.attackPause||0},{camera:[cameraX,cameraY,cameraZoom],effects:sourceExplods.length,entities:specialRuntime.entities.map(e=>[e.player,e.state,e.anim,e.x,e.y,e.vx,e.vy,e.kind,e.id,e.key,e.time,e.elem,!!e.removing])})}
 window.addEventListener('keydown',event=>{if(event.code==='F7'||event.code==='F8'){event.preventDefault();event.stopImmediatePropagation();document.querySelector(event.code==='F7'?'#dbgMark':'#dbgTrace').click()}},true);
 document.querySelector('#dbgTrace').addEventListener('click',()=>{
- const blob=new Blob([JSON.stringify({...matchLog.exportLog(),recentTrace:combatTraceExport()})],{type:'application/json'});
+ const blob=new Blob([JSON.stringify({...matchLog.exportLog(),battleResources:{sprites:residentSprites.snapshot(),audio:battleAudio.snapshot(),uiAudio:gameShell.audio.snapshot(),network:battleNetwork},recentTrace:combatTraceExport()})],{type:'application/json'});
  const url=URL.createObjectURL(blob),link=document.createElement('a');
  link.href=url;link.download='palace-0.24.09-trace.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  document.querySelector('#dbgTrace').blur();
@@ -1938,7 +1944,10 @@ function updateDebugHud(){
  document.querySelector('#hud b').textContent='Web beta 0.24.09 — '+(runtimeFailed?'ERROR':simPaused?'PAUSE':'READY');
  document.querySelector('#hudCamera').textContent='CAMERA '+signed(cameraX)+', '+signed(cameraY)+' · ZOOM '+cameraZoom.toFixed(3);
 }
-let simulationAccumulator=0,pausedVisualAccumulator=0;
+globalThis.__palaceBattleIsLive=()=>!simPaused&&!gameShell.isHome()&&!gameShell.isLoading();
+ const battleNetwork={attempts:0,urls:[]},baseFetch=globalThis.fetch.bind(globalThis);
+ globalThis.fetch=(resource,options)=>{if(globalThis.__palaceBattleIsLive()){const url=String(resource?.url||resource);battleNetwork.attempts++;battleNetwork.urls.push(url);return Promise.reject(Error('Network request attempted during battle: '+url))}return baseFetch(resource,options)};
+ let simulationAccumulator=0,pausedVisualAccumulator=0;
 function advancePausedVisuals(dt){
  if(mix)mix.update(dt);
  pausedVisualAccumulator+=dt;
@@ -1951,7 +1960,7 @@ function advanceSimulation(dt){
 function loop(){
  requestAnimationFrame(loop);
  if(gameShell.logoIntro&&!gameShell.logoIntro.finished){clock.getDelta();return}
- if(runtimeFailed)return;if(gameShell.isHome()){clock.getDelta();return}
+ if(runtimeFailed)return;if(gameShell.isHome()||gameShell.isLoading()){clock.getDelta();return}
  try{
   const dt=Math.min(clock.getDelta(),.05);
   if(simPaused){simulationAccumulator=0;advancePausedVisuals(dt);if(stepRequested&&!moveList.active){simStep();stepRequested=false}}
