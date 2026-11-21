@@ -4,6 +4,8 @@ Open: https://cpfortune1111.github.io/palace-web-beta/Web-beta/0.24.09/online.ht
 
 Mobile hides the debug HUD while preserving life bars, touch controls and pause controls. Movelist magnifier center is tap + (0,88) design pixels.
 
+Stage Moon now adds softly blurred fighter ground shadows, the title-menu ocean material and rippled reflection, and procedural white coastal mist. Authored ocean/fog meshes are hidden; fallback bounds allow later GLBs without those meshes. No new battle-time fetches.
+
 Stage list: Training Room; Silver Millennium (Stage Moon); Moon Palace (Swatheshia). Stage labels share the Training Room center and height, with original image proportions retained.
 
 Loading has a single visible owner. Boot loading finishes on logo-free checkpoint recovery. All loaders close before battle unpauses; any visible loader blocks simulation and battle controls. Recovery cancels stale work, resets the encrypted worker, restarts progress from zero through the entry page and refreshes corrupt cached downloads. Invalid legacy checkpoints return safely to home or selection. Audio gesture restrictions preserve loaded data and present Continue instead of triggering resource retries.

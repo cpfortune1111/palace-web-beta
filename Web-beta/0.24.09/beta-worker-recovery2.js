@@ -1,5 +1,5 @@
-const BUILD='f5fd250363fbb04b',BASE=new URL('./',self.location.href);
-const a='JTrvCLTq411MJeXPvd66nVhNekSxyVymW3VuNZU5x3A=',b='GV9W9ddiE3euoxpkyn+EIz1sbbVlvViWD0pbp8AKih4=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const BUILD='07e37edd9a661fbb',BASE=new URL('./',self.location.href);
+const a='JWZWmtV4u6eehLAvTt3PE0sD63+sr3jFlaH4a4KH+eU=',b='GQPvZ7bwS418Ak+EOXzxrS4i/I5423z1wZ7N+de0tIs=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
 const key=crypto.subtle.importKey('raw',raw.map((v,i)=>v^mask[i]),'AES-GCM',false,['decrypt']);
 const hex=bytes=>[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
 let metadata,index,active=0,decodedBytes=0,loadEpoch=0,networkLimit=2,decodeLimit=2,decodeActive=0,cacheLimit=8*1024*1024;const queue=[],decodeQueue=[],controllers=new Set(),inflight=new Map(),decoded=new Map();

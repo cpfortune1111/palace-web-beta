@@ -11,7 +11,7 @@ export function createTitleStage(parent){
  renderer.domElement.id='titleStage';renderer.domElement.style.cssText='position:absolute;pointer-events:none';parent.prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x05050d);
  const fireworks=createWinnerFireworks(scene);
- let camera,mixer,visible=true,settings,animationTime=0,oceanReflection;
+ let oceanTemplate;let camera,mixer,visible=true,settings,animationTime=0,oceanReflection;
  let frontClouds=false,behindEarthMeteors=false,oceanOcclusion=false;
  function fixPlanetLayers(model){
   model.traverse(node=>{
@@ -29,7 +29,7 @@ export function createTitleStage(parent){
   const occluder=new THREE.Mesh(earth.geometry,new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:true,side:THREE.FrontSide}));occluder.name='TitleEarthDepthOccluder';earth.add(occluder);
  }
  function addOceanReflection(model){
-  model.updateMatrixWorld(true);let ocean;model.traverse(node=>{if(node.isMesh&&/ocean/i.test(node.name))ocean=node});if(!ocean)throw Error('Title Ocean mesh not found');
+  model.updateMatrixWorld(true);let ocean;model.traverse(node=>{if(node.isMesh&&/ocean/i.test(node.name))ocean=node});if(!ocean)throw Error('Title Ocean mesh not found');oceanTemplate=ocean;
   for(const material of Array.isArray(ocean.material)?ocean.material:[ocean.material]){material.side=THREE.FrontSide;material.depthWrite=false}
   const bounds=new THREE.Box3().setFromBufferAttribute(ocean.geometry.getAttribute('position')).applyMatrix4(ocean.matrixWorld),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
   const waterPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-center.y);model.traverse(node=>{if(!node.isMesh)return;for(const material of Array.isArray(node.material)?node.material:[node.material])if(/shooting.?star/i.test(material.name))material.clippingPlanes=[waterPlane]});oceanOcclusion=true;
@@ -50,6 +50,6 @@ export function createTitleStage(parent){
   fixPlanetLayers(model.scene);mixer=new THREE.AnimationMixer(model.scene);for(const clip of model.animations)mixer.clipAction(clip).play();addOceanReflection(model.scene);resize();renderer.render(scene,camera);
  });
  window.addEventListener('resize',resize);
- return {ready,setWinner:fireworks.setWinner,addWinner:fireworks.addWinner,setTravel:amount=>{if(camera){camera.position.set(0,-.825+amount*.2,-amount*16);camera.rotation.set(THREE.MathUtils.degToRad(2.5),0,0)}},setVisible:value=>{visible=value;renderer.domElement.hidden=!value},render:dt=>{if(!visible||!camera)return;if(mixer){mixer.update(dt);animationTime+=dt}fireworks.render(dt);if(oceanReflection)oceanReflection.material.uniforms.time.value=animationTime;renderer.render(scene,camera)},snapshot:()=>({loaded:!!mixer,visible,animationTime,animations:settings?.animations,reflectiveOcean:!!oceanReflection,frontClouds,behindEarthMeteors,oceanOcclusion,fireworks:fireworks.snapshot()})};
+ return {ready,cloneOcean:()=>{if(!oceanTemplate)throw Error('Title ocean not prepared');return oceanTemplate.clone()},setWinner:fireworks.setWinner,addWinner:fireworks.addWinner,setTravel:amount=>{if(camera){camera.position.set(0,-.825+amount*.2,-amount*16);camera.rotation.set(THREE.MathUtils.degToRad(2.5),0,0)}},setVisible:value=>{visible=value;renderer.domElement.hidden=!value},render:dt=>{if(!visible||!camera)return;if(mixer){mixer.update(dt);animationTime+=dt}fireworks.render(dt);if(oceanReflection)oceanReflection.material.uniforms.time.value=animationTime;renderer.render(scene,camera)},snapshot:()=>({loaded:!!mixer,visible,animationTime,animations:settings?.animations,reflectiveOcean:!!oceanReflection,frontClouds,behindEarthMeteors,oceanOcclusion,fireworks:fireworks.snapshot()})};
 }
 
