@@ -8,13 +8,15 @@ export function createMoveList({parent=document.body,preview=false,settings,alte
  canvas.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,177.7778vh);height:min(56.25vw,100vh);z-index:100;touch-action:none';
  if(preview)canvas.style.cssText="width:100%;height:auto;touch-action:none";
  parent.append(canvas);
+ function layout(){if(preview)return;const v=visualViewport,w=v?.width||innerWidth,h=v?.height||innerHeight,f=Math.min(w/1280,h/720);for(const el of [canvas,lens,foreground])Object.assign(el.style,{left:((w-1280*f)/2)+'px',top:((h-720*f)/2)+'px',width:(1280*f)+'px',height:(720*f)+'px',transform:'none'})}
+ addEventListener('resize',layout);visualViewport?.addEventListener('resize',layout);addEventListener('orientationchange',()=>{layout();setTimeout(layout,150)});
  const screen=canvas.getContext('2d');let ctx=screen;const bg=document.createElement('canvas');bg.width=976;bg.height=544;
  const content=document.createElement('canvas');content.width=1952;content.height=1088;
  const contentContext=content.getContext('2d');contentContext.setTransform(2,0,0,2,-304,-280);
  const lens=document.createElement('canvas');lens.width=2560;lens.height=1440;lens.dataset.movelistLens='';lens.hidden=true;lens.ariaHidden='true';
  lens.style.cssText=canvas.style.cssText+';pointer-events:none;z-index:101';parent.append(lens);
  const foreground=document.createElement('canvas');foreground.dataset.movelistForeground='';foreground.width=1280;foreground.height=720;foreground.hidden=true;foreground.ariaHidden='true';foreground.style.cssText=canvas.style.cssText+';pointer-events:none;z-index:102';parent.append(foreground);const foregroundContext=foreground.getContext('2d');
- const lensContext=lens.getContext('2d');lensContext.scale(2,2);
+ layout();const lensContext=lens.getContext('2d');lensContext.scale(2,2);
  function renderLens(){
   lensContext.clearRect(0,0,1280,720);
   if(!drag||canvas.hidden||view!=='movelist'||switchAt)return;
@@ -44,7 +46,7 @@ export function createMoveList({parent=document.body,preview=false,settings,alte
    }
    columns[i]=[...unique.values()];scroll[i]=0;displayed[i]=columns[i][0]?.name;previous[i]=displayed[i];changed[i]=0;
   });
-  drag=null;lens.hidden=false;foreground.hidden=false;view=pending='movelist';switchAt=0;start=performance.now();side=0;canvas.hidden=false;cancelAnimationFrame(frame);frame=requestAnimationFrame(draw);
+  layout();drag=null;lens.hidden=false;foreground.hidden=false;view=pending='movelist';switchAt=0;start=performance.now();side=0;canvas.hidden=false;cancelAnimationFrame(frame);frame=requestAnimationFrame(draw);
  }
  function close(){canvas.hidden=true;lens.hidden=true;foreground.hidden=true;drag=null;renderLens();cancelAnimationFrame(frame)}
  function gradient(name){

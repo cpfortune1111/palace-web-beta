@@ -1,5 +1,5 @@
-const BUILD='26b8c7e426aef070',BASE=new URL('./',self.location.href);
-const a='FHEkdnGkkxZm9cN5nZzLmOmJMDouRs72SGHaNSa7pOU=',b='KBSdixIsYzyEczzS6j31JoyoJ8v6MsrGHF7vp3OI6Ys=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const BUILD='502bb7e786b6256d',BASE=new URL('./',self.location.href);
+const a='0HGY3Q0qgcgTHn3VZ890HC8dgxSE09PoHKXbnkwd2ws=',b='7BQhIG6iceLxmIJ+EG5Koko8lOVQp9fYSJruDBkulmU=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
 const key=crypto.subtle.importKey('raw',raw.map((v,i)=>v^mask[i]),'AES-GCM',false,['decrypt']);
 const hex=bytes=>[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
 let metadata,index,active=0,decodedBytes=0;const queue=[],inflight=new Map(),decoded=new Map();
@@ -13,7 +13,7 @@ async function readNetwork(file,hash,expected){return slot(async()=>{let failure
  }catch(error){clearTimeout(timer);failure=error;if(attempt===2||/HTTP (?:400|401|403|404|410)/.test(error.message))throw error;await new Promise(resolve=>setTimeout(resolve,[600,1600][attempt]))}}
  throw failure})}
 async function release(){return metadata??=fetch(new URL('release.json?build='+BUILD,BASE),{cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('Release metadata HTTP '+r.status);const data=await r.json();if(data.build!==BUILD)throw Error('A newer update is being published. Reopen the entry page.');return data}).catch(e=>{metadata=null;throw e})}
-async function decrypt(bytes){const data=new Uint8Array(bytes);return crypto.subtle.decrypt({name:'AES-GCM',iv:data.subarray(0,12)},await key,data.subarray(12))}
+let decryptCount=0;async function decrypt(bytes){decryptCount++;const data=new Uint8Array(bytes);return crypto.subtle.decrypt({name:'AES-GCM',iv:data.subarray(0,12)},await key,data.subarray(12))}
 async function catalog(){return index??=(async()=>{const m=await release(),bytes=await readNetwork('catalog.bin?build='+BUILD,m.catalog.sha256,m.catalog.bytes);let plain=await decrypt(bytes);if(m.catalog.gzip)plain=await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();return JSON.parse(new TextDecoder().decode(plain))})().catch(e=>{index=null;throw e})}
 async function asset(path){const entries=await catalog(),entry=entries[path];if(!entry)return null;const id=entry.id;
  if(decoded.has(id)){const data=decoded.get(id);decoded.delete(id);decoded.set(id,data);return {entry,data}}
@@ -29,3 +29,5 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.cl
 async function fetchCode(url){let response,error;for(let attempt=0;attempt<3;attempt++){try{response=await fetch(url,{cache:attempt?'reload':'default'});if(response.ok||(![408,429].includes(response.status)&&response.status<500))return response}catch(e){error=e}if(attempt<2)await new Promise(r=>setTimeout(r,[600,1600][attempt]))}if(response)return response;throw error}
 self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==BASE.origin||!url.pathname.startsWith(BASE.pathname))return;const path=decodeURIComponent(url.pathname.slice(BASE.pathname.length));if(path.startsWith('app/')&&/\.(?:js|html|css)$/.test(path)){const codeURL=new URL(event.request.url);codeURL.searchParams.set('betaBuild',BUILD);event.respondWith(fetchCode(codeURL));return}if(path.startsWith('app/'))event.respondWith(virtual(event.request,path.slice(4)).catch(e=>new Response('Unable to load encrypted content: '+e.message,{status:503,headers:{'Content-Type':'text/plain'}})));else event.respondWith(fetch(event.request))});
 self.addEventListener('message',event=>{if(!['READY','PREPARE'].includes(event.data?.type)||!event.ports[0])return;const port=event.ports[0];event.waitUntil(catalog().then(()=>port.postMessage({type:'ready',build:BUILD,onlineOnly:true})).catch(e=>port.postMessage({type:'error',message:e.message})))});
+
+self.addEventListener('message',event=>{if(event.data?.type==='DIAGNOSTICS'&&event.ports[0])event.ports[0].postMessage({decryptCount,decodedBytes,inflight:inflight.size})});

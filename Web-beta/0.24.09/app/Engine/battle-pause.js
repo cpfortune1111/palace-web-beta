@@ -8,7 +8,7 @@ export function createBattlePause({members,canPause,pause,resume,shell,bindings}
  surface.style.cssText='position:fixed;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;z-index:102;pointer-events:none';document.body.append(surface);
  const controls=document.createElement('div');controls.id='battlePauseSettings';controls.style.cssText='position:absolute;inset:0;pointer-events:none';surface.append(controls);
  const toolbar=document.createElement('div');toolbar.id='battlePauseButtons';toolbar.style.cssText=surface.style.cssText+';z-index:400';document.body.append(toolbar);
- function layout(){const fit=Math.min(innerWidth/1280,innerHeight/720);for(const el of [surface,toolbar])el.style.transform=`translate(-50%,-50%) scale(${fit})`};layout();addEventListener('resize',layout);
+ function layout(){const w=visualViewport?.width||innerWidth,h=visualViewport?.height||innerHeight,fit=Math.min(w/1280,h/720);for(const el of [surface,toolbar]){el.style.left=w/2+'px';el.style.top=h/2+'px';el.style.transform=`translate(-50%,-50%) scale(${fit})`}};layout();addEventListener('resize',layout);visualViewport?.addEventListener('resize',layout);addEventListener('orientationchange',()=>{layout();setTimeout(layout,150)});
  function icon(name,x,y,label,action){
   const b=document.createElement('button'),img=new Image(),size=name==='Pause'||name==='Play'?[48,48]:[99,129];
   b.type='button';b.ariaLabel=label;b.dataset.ownPress='';

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export function createDiscoBloom(renderer) {let enabled=false;
+export function createDiscoBloom(renderer) {let enabled=true;
  const source=new THREE.WebGLRenderTarget(1,1,{samples:4});
  const blur=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
  const settings={value:new THREE.Vector4(1.5,2,2,.5)};
@@ -49,7 +49,7 @@ export function createDiscoBloom(renderer) {let enabled=false;
  const quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material);scene.add(quad);
  const size=new THREE.Vector2(),clear=new THREE.Color();
  return {
-  setEnabled:value=>{enabled=value},
+  release(){source.setSize(1,1);blur.setSize(1,1)},setEnabled:value=>{enabled=value},
   tune({glow,color,clamp}){settings.value.fromArray(glow);tint.value.set(color);limit.value=clamp},
   draw(ball,cameraBall){
    const [,,radius,intensity]=settings.value;

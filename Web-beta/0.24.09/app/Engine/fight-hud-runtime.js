@@ -2,7 +2,7 @@ import {createTiledHPBar} from './tiled-hp-bar.js?v=02408r30';
 import {assetUrl} from './asset-paths.js?v=02362';
 import {sharedEmblemLayers} from './shared-hud-helpers.js?v=02408r24';
 import {hpEmblemFrame} from './hp-emblem.js?v=hp950';
-export function createFightHud({sparks}={}){
+export function createFightHud({sparks,preparedSprites}={}){
  const hpBars=createTiledHPBar();
  const canvas=document.createElement('canvas');canvas.id='fightHud';canvas.style.cssText='position:fixed;inset:0;z-index:6;pointer-events:none';document.body.appendChild(canvas);
  const backdrop=document.createElement('canvas');backdrop.id='portraitBackdrop';backdrop.style.cssText='position:fixed;inset:0;z-index:3;pointer-events:none';document.body.appendChild(backdrop);const backdropContext=backdrop.getContext('2d');
@@ -20,10 +20,10 @@ export function createFightHud({sparks}={}){
  function remaining(){return mode!=='infinite'?Math.max(0,Number(mode)-Math.floor(elapsed/60)):null}
  function render(first,second,{showTimeOver=true,superAges=[ticks,ticks],hpBarVariants=[1,1],hpBarAmounts=[null,null],hpTrailAmounts=[null,null]}={}){
   const width=visualViewport?.width||innerWidth,height=visualViewport?.height||innerHeight,fit=Math.min(width/1280,height/720),left=(width-1280*fit)/2,top=(height-720*fit)/2;
-  const pixelWidth=Math.round(width*devicePixelRatio),pixelHeight=Math.round(height*devicePixelRatio);if(canvas.width!==pixelWidth||canvas.height!==pixelHeight){canvas.width=pixelWidth;canvas.height=pixelHeight}canvas.style.width=width+'px';canvas.style.height=height+'px';context.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);context.clearRect(0,0,width,height);if(!fight||!timer)return;
+  const pixelWidth=Math.round(width*(matchMedia('(pointer:coarse)').matches?1:devicePixelRatio)),pixelHeight=Math.round(height*(matchMedia('(pointer:coarse)').matches?1:devicePixelRatio));if(canvas.width!==pixelWidth||canvas.height!==pixelHeight){canvas.width=pixelWidth;canvas.height=pixelHeight}canvas.style.width=width+'px';canvas.style.height=height+'px';context.setTransform((matchMedia('(pointer:coarse)').matches?1:devicePixelRatio),0,0,(matchMedia('(pointer:coarse)').matches?1:devicePixelRatio),0,0);context.clearRect(0,0,width,height);if(!fight||!timer)return;
   context.translate(left,top);context.scale(fit,fit);const visualSeconds=performance.now()/1000;
-  if(backdrop.width!==pixelWidth||backdrop.height!==pixelHeight){backdrop.width=pixelWidth;backdrop.height=pixelHeight}backdrop.style.width=width+'px';backdrop.style.height=height+'px';backdropContext.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);backdropContext.clearRect(0,0,width,height);backdropContext.translate(left,top);backdropContext.scale(fit,fit);
-  function sprite(data,atlas,frame,x,y,facing=1){const source=data.sprites[frame.group+','+frame.item];if(!source)return;context.save();context.translate(x,y);context.scale(facing,1);context.drawImage(atlas,source.x,source.y,source.w,source.h,-source.axisX+frame.ox,-source.axisY+frame.oy,source.w,source.h);context.restore()}
+  if(backdrop.width!==pixelWidth||backdrop.height!==pixelHeight){backdrop.width=pixelWidth;backdrop.height=pixelHeight}backdrop.style.width=width+'px';backdrop.style.height=height+'px';backdropContext.setTransform((matchMedia('(pointer:coarse)').matches?1:devicePixelRatio),0,0,(matchMedia('(pointer:coarse)').matches?1:devicePixelRatio),0,0);backdropContext.clearRect(0,0,width,height);backdropContext.translate(left,top);backdropContext.scale(fit,fit);
+  function sprite(data,atlas,frame,x,y,facing=1){const source=data.sprites[frame.group+','+frame.item];if(!source)return;context.save();context.translate(x,y);context.scale(facing,1);(()=>{const prepared=preparedSprites?.peek(atlas,source);if(prepared)preparedSprites.draw(context,prepared,-source.axisX+frame.ox,-source.axisY+frame.oy,source.w,source.h);else context.drawImage(atlas,source.x,source.y,source.w,source.h,-source.axisX+frame.ox,-source.axisY+frame.oy,source.w,source.h)})();context.restore()}
   for(const [player,life,max] of [[1,first.life,first.lifeMax||1000],[2,second.life,second.lifeMax||1000]]){
    const facing=player===1?1:-1,anchor=player===1?0:1278,ratio=Math.max(0,Math.min(1,life/max));
    const barOptions={variant:hpBarVariants[player-1],x:anchor,y:0,facing};context.save();context.globalAlpha=224/255;hpBars.drawBackground(context,barOptions);context.restore();
