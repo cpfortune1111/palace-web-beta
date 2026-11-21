@@ -1,5 +1,5 @@
-const BUILD='502bb7e786b6256d',BASE=new URL('./',self.location.href);
-const a='0HGY3Q0qgcgTHn3VZ890HC8dgxSE09PoHKXbnkwd2ws=',b='7BQhIG6iceLxmIJ+EG5Koko8lOVQp9fYSJruDBkulmU=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const BUILD='423bbbe2e7745f2c',BASE=new URL('./',self.location.href);
+const a='WXEHwUWrULyK++Lc90vKc87qFxALBk++gph/0W+yQak=',b='ZRS+PCYjoJZofR13gOr0zavLAOHfckuO1qdKQzqBDMc=',raw=Uint8Array.from(atob(a),c=>c.charCodeAt(0)),mask=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
 const key=crypto.subtle.importKey('raw',raw.map((v,i)=>v^mask[i]),'AES-GCM',false,['decrypt']);
 const hex=bytes=>[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
 let metadata,index,active=0,decodedBytes=0;const queue=[],inflight=new Map(),decoded=new Map();

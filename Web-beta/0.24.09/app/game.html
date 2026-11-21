@@ -1933,7 +1933,7 @@ function showRuntimeError(e){
 }
 function updateDebugHud(){
  fightHud.render({...displayP1(),character:battleCharacters[0],life:p1Life,lifeMax:p1LifeMax},{...p2,character:battleCharacters[1]},{showTimeOver:!roundFlow.enabled(),superAges:superIndicators.ages()});roundView.render(roundFlow.snapshot());
- if(!runtimeFailed&&updateDebugHud.paused===simPaused&&performance.now()-(updateDebugHud.last||0)<100)return;updateDebugHud.last=performance.now();updateDebugHud.paused=simPaused;const signed=value=>(Number(value)<0?'':'+')+Number(value).toFixed(1);
+ if(!runtimeFailed&&!simPaused&&updateDebugHud.paused===simPaused&&performance.now()-(updateDebugHud.last||0)<100)return;updateDebugHud.last=performance.now();updateDebugHud.paused=simPaused;const signed=value=>(Number(value)<0?'':'+')+Number(value).toFixed(1);
  const row=(player,fighter,localVX)=>'Player'+player+'__State'+fighter.state+'__Time'+fighter.time+'__Anim'+fighter.anim+'__Elem'+fighter.elem+'__VelX'+signed(localVX)+'__VelY'+signed(fighter.vy);
  const first=displayP1(),second=displayP2();
  const text=row(1,first,first.vx)+'\n'+row(2,second,second.vx*second.facing);if(act.textContent!==text)act.textContent=text;
