@@ -6,7 +6,7 @@ Online browser trial. Public HTML/JS/CSS; automatically decrypted AES-256-GCM me
 
 Loading percentage uses a hard-edged mask: gray over black, black over the filled pink bar.
 
-Before selection becomes interactive, Loading prepares all five trial characters' selection / ACS / versus declaration imagery and voices, ACS controls / font / light textures, and VS model shaders. Result declarations remain deferred until needed. Returning from battle refreshes released quote images before showing selection. No ACS / versus asset downloads are deferred until players choose.
+Before selection becomes interactive, Loading prepares all five trial characters' selection / ACS / versus declaration imagery and voices, ACS controls / font / light textures, and VS model shaders. Result declarations remain deferred until needed. Returning from battle refreshes released quote images before showing selection. No ACS / versus asset downloads are deferred until players choose. Decoded quote bitmaps remain resident through the selection flow. Expensive selection GPU destruction and quote-image release run only after the battle Loading screen has painted, not during selection-to-ACS handoff.
 
 Movelist magnifier samples the tapped point, displaying it at a circle center offset +68,+68 design pixels. Existing clipping, 280% magnification and release behavior remain.
 

@@ -69,5 +69,5 @@ export function createSelectScreen(parent,api){
   const sx=canvas.width/innerWidth,sy=canvas.height/innerHeight;
   ctx.drawImage(canvas,(innerWidth-1280*fit)/2*sx,(innerHeight-720*fit)/2*sy,1280*fit*sx,720*fit*sy,0,0,1280,720);
   return output;
- },setLegacyEffect:(name,value)=>stage3D?.setLegacyEffect(name,value),tune:value=>stage3D?.tune(value),setOpaque:value=>stage3D?.setOpaque(value),show,hide,handleKey,draw,progress:()=>loaded?1:Math.min(.99,packProgress*.7+.3*(completed/total*.4+portraitProgress*.6)),snapshot:()=>({phase,mode:targetMode,players:[...choices],hardware:[...hardware],command:[...command],confirmed:[...confirmed],portraitAnimations:portraits.map(portrait=>portrait.snapshot()),stage,visible:!view.hidden,effects:stage3D?.snapshot()})};
+ },releaseHiddenGPU:()=>stage3D?.releaseHidden(),setLegacyEffect:(name,value)=>stage3D?.setLegacyEffect(name,value),tune:value=>stage3D?.tune(value),setOpaque:value=>stage3D?.setOpaque(value),show,hide,handleKey,draw,progress:()=>loaded?1:Math.min(.99,packProgress*.7+.3*(completed/total*.4+portraitProgress*.6)),snapshot:()=>({phase,mode:targetMode,players:[...choices],hardware:[...hardware],command:[...command],confirmed:[...confirmed],portraitAnimations:portraits.map(portrait=>portrait.snapshot()),stage,visible:!view.hidden,effects:stage3D?.snapshot()})};
 }
